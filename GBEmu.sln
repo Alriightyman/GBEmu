@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GBEmu", "GBEmu\GBEmu.vcxproj", "{2188C7AB-3362-48FE-9C08-6910D0135BF9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Emulator", "Emulator\Emulator.vcxproj", "{C416738A-9DF0-414D-9AAE-E0DF2D3767E3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2188C7AB-3362-48FE-9C08-6910D0135BF9} = {2188C7AB-3362-48FE-9C08-6910D0135BF9}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

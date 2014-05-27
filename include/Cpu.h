@@ -37,6 +37,7 @@ private:
 
 public:
 	Cpu();
+	bool Initialize();
 	void Run();
 
 #pragma region Accessors/Mutators
@@ -47,6 +48,7 @@ public:
 	// Register F, Flag Register
 	byte GetFlagReg() const { return m_F; }
 	void ClearFlags() { m_F = 0; }
+	byte GetFlag(byte bit) { return (m_F >> bit) & 1; }
 	// bit must be bits 4-7.
 	void ClearFlagBit(byte bit) { m_F |= ( 0 << bit); }
 	void SetFlagBit(byte bit) { m_F |= (1 << bit); }
@@ -88,7 +90,8 @@ public:
 	short GetProgramCounter()const { return m_PC; }
 	void SetProgramCounter(short value) { m_PC = value; }
 #pragma endregion
-public:
+private:
+#ifdef FNCPTRS
 #pragma region Commands
 // all command return the number of cycles executed
 // 1 byte, 4 cycles					// 00
@@ -109,5 +112,6 @@ uint LD_Bd8(Memory& mem);
 uint RLCA(Memory& mem);
 
 #pragma endregion
+#endif
 };
 
