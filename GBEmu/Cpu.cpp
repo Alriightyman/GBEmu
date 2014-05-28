@@ -3,7 +3,7 @@
 Cpu::Cpu() 
 	: m_PC(0x100),m_B(0),m_C(0x13),m_D(0),
 	m_E(0xD8),m_H(0x1),m_L(0x4D),m_SP(0xFFFE),
-	m_A(0x0),m_F(0x1),m_cycles(0)
+	m_A(0x0),m_cycles(0)
 {
 
 }
@@ -14,68 +14,104 @@ bool Cpu::Initialize()
 	return true;
 }
 
-void Cpu::Run()
+void Cpu::Run(Memory& mem)
 {
+	byte* opcode = &mem[m_PC];
 
+	switch (*opcode)
+	{
+	case 0x00: // nop - - - -
+		{
+			m_cycles += 4;
+		}
+		break;
+	case 0x01: // ld bc,d16 - - - -
+		{
+			m_B = opcode[1];
+			m_C = opcode[2];
+			m_PC += 2;
+			m_cycles += 12;
+		}
+		break;
+	case 0x02: // ld (bc),a - - - -
+		{
+			mem[((m_B << 8) | m_C)] = m_A;	
+			m_cycles +=  8; 
+		}
+		break;
+	case 0x03: // inc BC - - - -
+		{
+			short answer = (m_B << 8) | m_C;
+			answer++;
+			m_B = (answer >> 8) & 0xF;
+			m_C = answer & 0xF;
+			m_cycles += 8;
+		}
+		break;
+	case 0x04: // inc b z 0 h -
+		{
+			short answer = m_B + 1;
+			short hc = (m_B & 0xFF) + 1;
+			m_F.z = ((answer & 0xFF) == 0);
+			m_F.n = 0;
+			m_F.h = ((hc & 0xF) == 0 && m_B != 0xFF);
+			m_B = answer & 0xFF;
+			m_cycles += 4;
+		}
+		break;
+	case 0x05: // dec b z 1 h -
+		{
+			short answer = m_B - 1;
+			m_F.z = ((answer & 0xFF) == 0);
+			m_F.n = 1;
+			m_F.h = ((answer & 0xF) == 0xF && m_B != 0);
+			m_B = answer & 0xFF;
+			m_cycles += 4;
+		}
+		break;
+	case 0x06: // LD B,d8 - - - 
+		{
+			m_B = opcode[1];
+			m_PC++;
+			m_cycles += 8; 
+		}
+		break;
+	case 0x07: // RLCA 0 0 0 c
+		{
+			short answer = m_A << 1;
+			m_F.z = ((answer & 0xFF) == 0);
+			m_F.n = 0;
+			m_F.h = 0;
+			m_F.c = (answer > 0xFF);
+			m_A = answer & 0xFF;
+			m_cycles += 4;
+		}
+		break;
+	case 0x08: // LD (a16),sp - - - -
+		{
+			uint offset = opcode[1] << 8 | opcode[2];
+			mem[offset] = (m_SP >> 8 ) & 0xFF;
+			mem[offset + 1] = m_SP & 0xFF;
+			m_PC += 2;
+			m_cycles += 20;
+		}
+		break;
+	case 0x09: // add HL, BC - 0 h c
+		{
+			uint answer = ((m_H << 8) | m_L) + ((m_B << 8) | m_C);
+			ushort hc = answer & 0xFFFF;
+			m_F.n = 0;
+			m_F.c = (answer > 0xFFFF);
+			m_F.h = (answer );
+			m_cycles += 4;
+		}
+		break;
+
+	}
+
+	// increment opcode by one
+	m_PC++;
 }
-#pragma region Commands
-// most of the opcodes are created via macros
-// ------------------------------------------
-// 8-Bit Loads
-// ------------------------------------------
-// LD nn,n
-// nn = B,C,D,E,H,L
-// n = 8-bit immediate value
-// opcodes - 06, 0E, 16,1E,26,2E
-#define ld_nn_n(r) 					\
-		m_PC++;						\
-		r = mem[0xFF00 + m_PC];		\
-		return  8;	
-// LD r1,r2
-// r1,r2 =A, B,C,D,E,H,L
-// opcodes - 7F,78,79,7A,7B,7C,40,41,42,43,44,45,48,49,4A
-//			 4B,4C,4D,50,51,52,53,54,55,58,59,5A,5B,5C,5D,
-//			 60,61,62,63,64,65,68,69,6A,6B,6C,6D
-#define ld_r1r2(r1,r2)			\
-		r1 = r2;				\
-		return 4;
-// LD r1,(hl)
-// r1 =A, B,C,D,E,H,L
-// opcodes - 7E,46,4E,56,5E,66,6E
-#define ld_r1hl(r1)								\
-		r1 = mem[0xFF00 + ((m_H << 8) | m_L)];	\
-		return 8;
-// LD (hl),r
-// r = B,C,D,E,L,H,n
-// opcodes - 70,71,72,73,74,75
-#define ld_hlr(r)							\
-	mem[0xFF00 + ((m_H << 8 ) | m_L)] = r;	\
-	return 8;
-// LD (hl),n
-// n = 8-bit immediate
-// opcodes - 36
-#define ld_hln(n)							\
-	mem[0xFF00 + ((m_H << 8) | m_L)] = n;	\
-	return 12;
-// LD a,n
-// n = A,B,C,D,E,H,L,8-bit value
-// opcodes - 7F,78,79,7A,7B,7C,7D
-#define ld_an(n)							\
-	m_A = n;								\
-	return 4;
-// LD a,(r1r2)
-// r1 = B,D,H
-// r2 = C,E,L
-// opcodes - 7F,78,79,7A,7B,7C,7D
-#define ld_aRegAddr(r1,r2)					\
-	m_A = mem[0xFF00 + ((r1 >> 8) | r2)];	\
-	return 8;
-
-
-
-
-#pragma endregion
-
 
 #ifdef FNCPTRS
 // ==========================================

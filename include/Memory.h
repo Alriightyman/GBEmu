@@ -4,7 +4,7 @@ typedef unsigned char byte;
 class Memory
 {
 private:
-	byte m_memory[0xFFFF];
+	byte* m_memory;
 public:
 	Memory(void);
 	bool Initialize();

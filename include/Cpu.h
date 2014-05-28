@@ -20,16 +20,25 @@ typedef unsigned short ushort;
 
 class Cpu
 {
+private:
+	struct FReg 
+	{
+		byte z:1;
+		byte n:1;
+		byte h:1;
+		byte c:1;
+		byte unused:4;
+	};
 
 private:
 #pragma region Member Variables
-	byte m_A,m_F;
+	byte m_A;
 	byte m_B,m_C;
 	byte m_D,m_E;
 	byte m_H,m_L;
-	short m_SP; 
-	short m_PC;
-
+	ushort m_SP; 
+	ushort m_PC;
+	FReg m_F;
 	uint m_cycles;
 
 #pragma endregion
@@ -38,7 +47,7 @@ private:
 public:
 	Cpu();
 	bool Initialize();
-	void Run();
+	void Run(Memory& mem);
 
 #pragma region Accessors/Mutators
 	// Accessor/Mutators
@@ -46,16 +55,15 @@ public:
 	byte GetRegA() const {return m_A;}
 	void SetRegA(byte value) { m_A = value; }
 	// Register F, Flag Register
-	byte GetFlagReg() const { return m_F; }
-	void ClearFlags() { m_F = 0; }
-	byte GetFlag(byte bit) { return (m_F >> bit) & 1; }
-	// bit must be bits 4-7.
-	void ClearFlagBit(byte bit) { m_F |= ( 0 << bit); }
-	void SetFlagBit(byte bit) { m_F |= (1 << bit); }
-	void ClearFlagsAndSet(byte bit) { m_F= 0; m_F = (1<<bit); }
-	// Register AF
-	short GetRegAF() const { return (m_A << 8) | m_F; }
-	void SetRegAF(short value) { m_A = (value >> 8) & 0xFF; m_F = (value & 0xFF); }
+	void ClearFlags() { m_F.c = m_F.h = m_F.n = m_F.z = m_F.unused = 0; }
+	bool GetZFlag() { return m_F.z; }
+	bool GetNFlag() { return m_F.n; }
+	bool GetHFlag() { return m_F.h; }
+	bool GetCFlag() { return m_F.c; }
+	void SetZFlag(bool bit) { m_F.z = bit; }
+	void SetNFlag(bool bit) { m_F.n = bit; }
+	void SetHFlag(bool bit) { m_F.h = bit; }
+	void SetCFlag(bool bit) { m_F.c = bit; }
 	// Reg B
 	byte GetRegB() const {return m_B;}
 	void SetRegB(byte value) { m_B = value; }

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <SDL.h>
 #include "Emulator.h"
-#include "Debug.h"
+
 
 // sdl test application
 int main(int argc, char** argv)
@@ -23,6 +23,7 @@ int main(int argc, char** argv)
 		}
 
 		emu.Run();
+		
 	}
 
 	SDL_Quit();

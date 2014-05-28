@@ -11,8 +11,8 @@ void Debug::Print(Cpu c)
 	cout << "B: " << static_cast<unsigned int>(c.GetRegB()) << " C: " << static_cast<unsigned int>(c.GetRegC()) << endl;
 	cout << "D: " << static_cast<unsigned int>(c.GetRegD()) << " E: " << static_cast<unsigned int>(c.GetRegE()) << endl;
 	cout << "H: " << static_cast<unsigned int>(c.GetRegH()) << " L: " << static_cast<unsigned int>(c.GetRegL()) << endl;
-	cout << "Flags\n" << "z n h c\n" << static_cast<unsigned int>(c.GetFlag(ZFlag)) <<" "<< static_cast<unsigned int>(c.GetFlag(NFlag))
-							<<" "<< static_cast<unsigned int>(c.GetFlag(HFlag)) <<" "<< static_cast<unsigned int>(c.GetFlag(CFlag)) << endl;
+	cout << "Flags\n" << "z n h c\n" << c.GetZFlag() <<" "<< c.GetNFlag()
+							<<" "<< c.GetHFlag() <<" "<< c.GetCFlag() << endl;
 }
 void Debug::ClearScreen()
 {

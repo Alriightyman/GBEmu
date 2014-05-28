@@ -1,5 +1,5 @@
 #include "Emulator.h"
-
+#include "Debug.h"
 
 Emulator::Emulator(void) : m_isRunning(false)
 {
@@ -27,7 +27,9 @@ bool Emulator::Initialize()
 void Emulator::Run()
 {
 	if ( m_isRunning)
-		m_cpu.Run();
+		m_cpu.Run(m_memory);
 
 	m_video.Run();
+
+	Debug::Print(m_cpu);
 }
