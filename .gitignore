@@ -213,3 +213,14 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+###############
+## Custom Files
+###############
+*.db
+*.lib
+*.idb
+*.pdb
+*.obj
+*.tlog
+*.log
