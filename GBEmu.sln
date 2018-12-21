@@ -1,11 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2050
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GBEmu", "GBEmu\GBEmu.vcxproj", "{2188C7AB-3362-48FE-9C08-6910D0135BF9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Emulator", "Emulator\Emulator.vcxproj", "{C416738A-9DF0-414D-9AAE-E0DF2D3767E3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2188C7AB-3362-48FE-9C08-6910D0135BF9} = {2188C7AB-3362-48FE-9C08-6910D0135BF9}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{491E711F-0A25-4084-B888-0BB3CCF56C51}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Global
@@ -25,5 +32,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2ABC560-E5A7-43E5-9E47-54655E763D15}
 	EndGlobalSection
 EndGlobal
