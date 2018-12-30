@@ -3,17 +3,7 @@
 #include <windows.h>
 using namespace std;
 
-void Debug::Print(Cpu c)
-{
-	ClearScreen();
-	cout << "Registers" << endl;
-	cout << "A: " << static_cast<unsigned int>(c.GetRegA()) << endl;
-	cout << "B: " << static_cast<unsigned int>(c.GetRegB()) << " C: " << static_cast<unsigned int>(c.GetRegC()) << endl;
-	cout << "D: " << static_cast<unsigned int>(c.GetRegD()) << " E: " << static_cast<unsigned int>(c.GetRegE()) << endl;
-	cout << "H: " << static_cast<unsigned int>(c.GetRegH()) << " L: " << static_cast<unsigned int>(c.GetRegL()) << endl;
-	cout << "Flags\n" << "z n h c\n" << c.GetZFlag() <<" "<< c.GetNFlag()
-							<<" "<< c.GetHFlag() <<" "<< c.GetCFlag() << endl;
-}
+
 void Debug::ClearScreen()
 {
 #ifdef _DEBUG

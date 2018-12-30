@@ -1965,14 +1965,14 @@ namespace Gameboy
 		cycleCount += 8;
 	}
 	/// SWAP L
-	void CPU::OpcodeCB_37()
+	void CPU::OpcodeCB_35()
 	{
 		Swap(hl.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 	/// SWAP (HL)
-	void CPU::OpcodeCB_37()
+	void CPU::OpcodeCB_36()
 	{
 		u8 value = mmu.Read(hl.Value);
 		Swap(value);
