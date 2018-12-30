@@ -19,6 +19,7 @@ build/
 [Bb]in/
 [Oo]bj/
 .vs/
+Roms/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -151,7 +152,6 @@ $RECYCLE.BIN/
 
 # Mac crap
 .DS_Store
-
 
 ###############
 ## Custom Files
