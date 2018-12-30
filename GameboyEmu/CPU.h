@@ -7,7 +7,8 @@ namespace Gameboy
 {
 	class CPU
 	{
-#pragma region Cycle Count list
+
+	#pragma region Opcode function tables
 		typedef void(CPU::*OpcodeFunction)();
 		const OpcodeFunction Opcodes[256] =
 		{
@@ -29,9 +30,29 @@ namespace Gameboy
 			&CPU::OpcodeF0,&CPU::OpcodeF1,&CPU::OpcodeF2,&CPU::OpcodeF3,&CPU::OpcodeF4,&CPU::OpcodeF5,&CPU::OpcodeF6,&CPU::OpcodeF7,&CPU::OpcodeF8,&CPU::OpcodeF9,&CPU::OpcodeFA,&CPU::OpcodeFB,&CPU::OpcodeFC,&CPU::OpcodeFD,&CPU::OpcodeFE,&CPU::OpcodeFF
 		};
 
+		const OpcodeFunction OpcodeCBs[256] =
+		{
+			&CPU::OpcodeCB_00,&CPU::OpcodeCB_01,&CPU::OpcodeCB_02,&CPU::OpcodeCB_03,&CPU::OpcodeCB_04,&CPU::OpcodeCB_05,&CPU::OpcodeCB_06,&CPU::OpcodeCB_07,&CPU::OpcodeCB_08,&CPU::OpcodeCB_09,&CPU::OpcodeCB_0A,&CPU::OpcodeCB_0B,&CPU::OpcodeCB_0C,&CPU::OpcodeCB_0D,&CPU::OpcodeCB_0E,&CPU::OpcodeCB_0F,
+			&CPU::OpcodeCB_10,&CPU::OpcodeCB_11,&CPU::OpcodeCB_12,&CPU::OpcodeCB_13,&CPU::OpcodeCB_14,&CPU::OpcodeCB_15,&CPU::OpcodeCB_16,&CPU::OpcodeCB_17,&CPU::OpcodeCB_18,&CPU::OpcodeCB_19,&CPU::OpcodeCB_1A,&CPU::OpcodeCB_1B,&CPU::OpcodeCB_1C,&CPU::OpcodeCB_1D,&CPU::OpcodeCB_1E,&CPU::OpcodeCB_1F,
+			&CPU::OpcodeCB_20,&CPU::OpcodeCB_21,&CPU::OpcodeCB_22,&CPU::OpcodeCB_23,&CPU::OpcodeCB_24,&CPU::OpcodeCB_25,&CPU::OpcodeCB_26,&CPU::OpcodeCB_27,&CPU::OpcodeCB_28,&CPU::OpcodeCB_29,&CPU::OpcodeCB_2A,&CPU::OpcodeCB_2B,&CPU::OpcodeCB_2C,&CPU::OpcodeCB_2D,&CPU::OpcodeCB_2E,&CPU::OpcodeCB_2F,
+			&CPU::OpcodeCB_30,&CPU::OpcodeCB_31,&CPU::OpcodeCB_32,&CPU::OpcodeCB_33,&CPU::OpcodeCB_34,&CPU::OpcodeCB_35,&CPU::OpcodeCB_36,&CPU::OpcodeCB_37,&CPU::OpcodeCB_38,&CPU::OpcodeCB_39,&CPU::OpcodeCB_3A,&CPU::OpcodeCB_3B,&CPU::OpcodeCB_3C,&CPU::OpcodeCB_3D,&CPU::OpcodeCB_3E,&CPU::OpcodeCB_3F,
+			&CPU::OpcodeCB_40,&CPU::OpcodeCB_41,&CPU::OpcodeCB_42,&CPU::OpcodeCB_43,&CPU::OpcodeCB_44,&CPU::OpcodeCB_45,&CPU::OpcodeCB_46,&CPU::OpcodeCB_47,&CPU::OpcodeCB_48,&CPU::OpcodeCB_49,&CPU::OpcodeCB_4A,&CPU::OpcodeCB_4B,&CPU::OpcodeCB_4C,&CPU::OpcodeCB_4D,&CPU::OpcodeCB_4E,&CPU::OpcodeCB_4F,
+			&CPU::OpcodeCB_50,&CPU::OpcodeCB_51,&CPU::OpcodeCB_52,&CPU::OpcodeCB_53,&CPU::OpcodeCB_54,&CPU::OpcodeCB_55,&CPU::OpcodeCB_56,&CPU::OpcodeCB_57,&CPU::OpcodeCB_58,&CPU::OpcodeCB_59,&CPU::OpcodeCB_5A,&CPU::OpcodeCB_5B,&CPU::OpcodeCB_5C,&CPU::OpcodeCB_5D,&CPU::OpcodeCB_5E,&CPU::OpcodeCB_5F,
+			&CPU::OpcodeCB_60,&CPU::OpcodeCB_61,&CPU::OpcodeCB_62,&CPU::OpcodeCB_63,&CPU::OpcodeCB_64,&CPU::OpcodeCB_65,&CPU::OpcodeCB_66,&CPU::OpcodeCB_67,&CPU::OpcodeCB_68,&CPU::OpcodeCB_69,&CPU::OpcodeCB_6A,&CPU::OpcodeCB_6B,&CPU::OpcodeCB_6C,&CPU::OpcodeCB_6D,&CPU::OpcodeCB_6E,&CPU::OpcodeCB_6F,
+			&CPU::OpcodeCB_70,&CPU::OpcodeCB_71,&CPU::OpcodeCB_72,&CPU::OpcodeCB_73,&CPU::OpcodeCB_74,&CPU::OpcodeCB_75,&CPU::OpcodeCB_76,&CPU::OpcodeCB_77,&CPU::OpcodeCB_78,&CPU::OpcodeCB_79,&CPU::OpcodeCB_7A,&CPU::OpcodeCB_7B,&CPU::OpcodeCB_7C,&CPU::OpcodeCB_7D,&CPU::OpcodeCB_7E,&CPU::OpcodeCB_7F,
+			&CPU::OpcodeCB_80,&CPU::OpcodeCB_81,&CPU::OpcodeCB_82,&CPU::OpcodeCB_83,&CPU::OpcodeCB_84,&CPU::OpcodeCB_85,&CPU::OpcodeCB_86,&CPU::OpcodeCB_87,&CPU::OpcodeCB_88,&CPU::OpcodeCB_89,&CPU::OpcodeCB_8A,&CPU::OpcodeCB_8B,&CPU::OpcodeCB_8C,&CPU::OpcodeCB_8D,&CPU::OpcodeCB_8E,&CPU::OpcodeCB_8F,
+			&CPU::OpcodeCB_90,&CPU::OpcodeCB_91,&CPU::OpcodeCB_92,&CPU::OpcodeCB_93,&CPU::OpcodeCB_94,&CPU::OpcodeCB_95,&CPU::OpcodeCB_96,&CPU::OpcodeCB_97,&CPU::OpcodeCB_98,&CPU::OpcodeCB_99,&CPU::OpcodeCB_9A,&CPU::OpcodeCB_9B,&CPU::OpcodeCB_9C,&CPU::OpcodeCB_9D,&CPU::OpcodeCB_9E,&CPU::OpcodeCB_9F,
+			&CPU::OpcodeCB_A0,&CPU::OpcodeCB_A1,&CPU::OpcodeCB_A2,&CPU::OpcodeCB_A3,&CPU::OpcodeCB_A4,&CPU::OpcodeCB_A5,&CPU::OpcodeCB_A6,&CPU::OpcodeCB_A7,&CPU::OpcodeCB_A8,&CPU::OpcodeCB_A9,&CPU::OpcodeCB_AA,&CPU::OpcodeCB_AB,&CPU::OpcodeCB_AC,&CPU::OpcodeCB_AD,&CPU::OpcodeCB_AE,&CPU::OpcodeCB_AF,
+			&CPU::OpcodeCB_B0,&CPU::OpcodeCB_B1,&CPU::OpcodeCB_B2,&CPU::OpcodeCB_B3,&CPU::OpcodeCB_B4,&CPU::OpcodeCB_B5,&CPU::OpcodeCB_B6,&CPU::OpcodeCB_B7,&CPU::OpcodeCB_B8,&CPU::OpcodeCB_B9,&CPU::OpcodeCB_BA,&CPU::OpcodeCB_BB,&CPU::OpcodeCB_BC,&CPU::OpcodeCB_BD,&CPU::OpcodeCB_BE,&CPU::OpcodeCB_BF,
+			&CPU::OpcodeCB_C0,&CPU::OpcodeCB_C1,&CPU::OpcodeCB_C2,&CPU::OpcodeCB_C3,&CPU::OpcodeCB_C4,&CPU::OpcodeCB_C5,&CPU::OpcodeCB_C6,&CPU::OpcodeCB_C7,&CPU::OpcodeCB_C8,&CPU::OpcodeCB_C9,&CPU::OpcodeCB_CA,&CPU::OpcodeCB_CB,&CPU::OpcodeCB_CC,&CPU::OpcodeCB_CD,&CPU::OpcodeCB_CE,&CPU::OpcodeCB_CF,
+			&CPU::OpcodeCB_D0,&CPU::OpcodeCB_D1,&CPU::OpcodeCB_D2,&CPU::OpcodeCB_D3,&CPU::OpcodeCB_D4,&CPU::OpcodeCB_D5,&CPU::OpcodeCB_D6,&CPU::OpcodeCB_D7,&CPU::OpcodeCB_D8,&CPU::OpcodeCB_D9,&CPU::OpcodeCB_DA,&CPU::OpcodeCB_DB,&CPU::OpcodeCB_DC,&CPU::OpcodeCB_DD,&CPU::OpcodeCB_DE,&CPU::OpcodeCB_DF,
+			&CPU::OpcodeCB_E0,&CPU::OpcodeCB_E1,&CPU::OpcodeCB_E2,&CPU::OpcodeCB_E3,&CPU::OpcodeCB_E4,&CPU::OpcodeCB_E5,&CPU::OpcodeCB_E6,&CPU::OpcodeCB_E7,&CPU::OpcodeCB_E8,&CPU::OpcodeCB_E9,&CPU::OpcodeCB_EA,&CPU::OpcodeCB_EB,&CPU::OpcodeCB_EC,&CPU::OpcodeCB_ED,&CPU::OpcodeCB_EE,&CPU::OpcodeCB_EF,
+			&CPU::OpcodeCB_F0,&CPU::OpcodeCB_F1,&CPU::OpcodeCB_F2,&CPU::OpcodeCB_F3,&CPU::OpcodeCB_F4,&CPU::OpcodeCB_F5,&CPU::OpcodeCB_F6,&CPU::OpcodeCB_F7,&CPU::OpcodeCB_F8,&CPU::OpcodeCB_F9,&CPU::OpcodeCB_FA,&CPU::OpcodeCB_FB,&CPU::OpcodeCB_FC,&CPU::OpcodeCB_FD,&CPU::OpcodeCB_FE,&CPU::OpcodeCB_FF
+		};
+
 #pragma endregion
 
-#pragma region Fields
+	#pragma region Fields
 	private:
 		Register af;
 		Register bc;
@@ -44,16 +65,27 @@ namespace Gameboy
 		ALU alu;
 
 		int cycleCount;
+		bool halt;
+		bool stop;
+		bool disableInterrupts;
+		bool enableInterrupts;
+		const int MAXCYCLES = 69905;
+
 #pragma endregion
-#pragma region Methods
+
+	#pragma region Methods
 	public:
 		CPU();
 		~CPU();
+		void Execute();
 
 	private:
 		u8 Load8BitImmediateValue();
 		u16 Load16BitImmediateValue();
-
+		void ExecuteNextOpcode();
+		void UpdateTimers();
+		void UpdateGraphics();
+		void RunInterrupts();
 #pragma region Opcodes
 		void Opcode00();
 		void Opcode01();
@@ -576,7 +608,9 @@ namespace Gameboy
 		void LD(u16& reg, u16 value);
 		void Push(u16 value);
 		u16 Pop();
+		void Swap(u8& n);
 
 #pragma endregion
+
 	};
 }

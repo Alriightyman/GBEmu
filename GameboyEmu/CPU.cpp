@@ -3,8 +3,9 @@
 
 namespace Gameboy
 {
-	///
-	CPU::CPU() : cycleCount(0x00)
+	using CPUFlags = Utility::Flags;
+
+	CPU::CPU() : cycleCount(0x00), halt(false), stop(false), disableInterrupts(false), enableInterrupts(false)
 	{
 		af = 0x01B0;
 		bc = 0x0013; 
@@ -13,10 +14,9 @@ namespace Gameboy
 		sp = 0xFFFE;
 	}
 
-
 	CPU::~CPU()
 	{
-	}	
+	}
 
 	u8 CPU::Load8BitImmediateValue()
 	{
@@ -617,7 +617,8 @@ namespace Gameboy
 
 #pragma endregion
 
-#pragma region 5. LD A,(C)	// 5. LD A,(C)
+#pragma region 5. LD A,(C)
+	// 5. LD A,(C)
 	// Description:
 	// 	   Put value at address $FF00 + register C into A.
 	//	   Same as : LD A, ($FF00 + C)
@@ -629,9 +630,11 @@ namespace Gameboy
 	}
 #pragma endregion
 
-#pragma region 6. LD (C),A	// 6. LD (C),A
+#pragma region 6. LD (C),A
+	// 6. LD (C),A
 	// Description :
-	//		Put A into address $FF00 + register C.	void CPU::OpcodeE2()
+	//		Put A into address $FF00 + register C.
+	void CPU::OpcodeE2()
 	{
 		mmu.Write((0xFF0 + bc.Lo), af.Hi);
 		pc += 2;
@@ -695,7 +698,8 @@ namespace Gameboy
 	// Description :
 	//		Put A into memory address $FF00 + n.
 	//		Use with :
-	//	 		n = one byte immediate value.	void CPU::OpcodeE0()
+	//	 		n = one byte immediate value.
+	void CPU::OpcodeE0()
 	{
 		mmu.Write((0xff00 + Load8BitImmediateValue()), af.Hi);
 		pc += 2;
@@ -707,7 +711,8 @@ namespace Gameboy
 	// Description:
 	//	   Put memory address $FF00 + n into A.
 	//	   Use with :
-	//		   n = one byte immediate value.	void CPU::OpcodeF0()
+	//		   n = one byte immediate value.
+	void CPU::OpcodeF0()
 	{
 		LD(af.Hi, mmu.Read(0xFF00 + Load8BitImmediateValue()));
 		pc += 2;
@@ -803,10 +808,10 @@ namespace Gameboy
 		u8 immediateValue = Load8BitImmediateValue();
 		LD(hl.Value, sp.Value + immediateValue);
 
-		Utility::SetFlags(af.Lo, Utility::Flags::Z, false);
-		Utility::SetFlags(af.Lo, Utility::Flags::N, false);
-		Utility::SetFlags(af.Lo, Utility::Flags::H, Utility::IsHalfCarry16(sp.Value, immediateValue));
-		Utility::SetFlags(af.Lo, Utility::Flags::C, Utility::IsFullCarry16(sp.Value, immediateValue));
+		Utility::SetFlags(af.Lo, CPUFlags::Z, false);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, Utility::IsHalfCarry16(sp.Value, immediateValue));
+		Utility::SetFlags(af.Lo, CPUFlags::C, Utility::IsFullCarry16(sp.Value, immediateValue));
 		pc += 2;
 		cycleCount += 12;
 	}
@@ -848,7 +853,9 @@ namespace Gameboy
 	///			Push register pair nn onto stack.
 	///				Decrement Stack Pointer(SP) twice.
 	///				Use with :
-	///			nn = AF, BC, DE, HL	///</ summary>	
+	///			nn = AF, BC, DE, HL
+	///</ summary>
+	
 	// push AF
 	void CPU::OpcodeF5()
 	{
@@ -876,7 +883,6 @@ namespace Gameboy
 		cycleCount += 16;
 	}
 #pragma endregion
-
 
 #pragma region 7. POP nn
 	
@@ -1023,7 +1029,9 @@ namespace Gameboy
 
 #pragma endregion
 
-#pragma region 2. ADC A,n		/// <summary>
+#pragma region 2. ADC A,n
+	
+	/// <summary>
 	/// ADC A, A
 	/// </summary>
 	void CPU::Opcode8F()
@@ -1112,7 +1120,8 @@ namespace Gameboy
 		cycleCount += 8;
 	}
 
-#pragma endregion 
+#pragma endregion 
+
 #pragma region 3. SUB n
 	
 	/// <summary>
@@ -1120,8 +1129,1086 @@ namespace Gameboy
 	/// </summary>
 	void CPU::Opcode97()
 	{
-		alu.Sub()
+		alu.Sub(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SUB B
+	/// </summary>
+	void CPU::Opcode90()
+	{
+		alu.Sub(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SUB C
+	/// </summary>
+	void CPU::Opcode91()
+	{
+		alu.Sub(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SUB D
+	/// </summary>
+	void CPU::Opcode92()
+	{
+		alu.Sub(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SUB E
+	/// </summary>
+	void CPU::Opcode93()
+	{
+		alu.Sub(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SUB H
+	/// </summary>
+	void CPU::Opcode94()
+	{
+		alu.Sub(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SUB L
+	/// </summary>
+	void CPU::Opcode95()
+	{
+		alu.Sub(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SUB (HL)
+	/// </summary>
+	void CPU::Opcode96()
+	{
+		alu.Sub(mmu.Read(hl.Value));
+		pc++;
+		cycleCount += 8;
+	}
+
+	/// <summary>
+	/// SUB d8
+	/// </summary>
+	void CPU::OpcodeD6()
+	{
+		alu.Sub(Load8BitImmediateValue());
+		pc += 2;
+		cycleCount += 8;
 	}
 #pragma endregion
+
+#pragma region 4. SBC A,n	
+	/// <summary>
+	/// SBC A, A
+	/// </summary>
+	void CPU::Opcode9F()
+	{
+		alu.Sbc(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SBC A, B
+	/// </summary>
+	void CPU::Opcode98()
+	{
+		alu.Sbc(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SBC A, C
+	/// </summary>
+	void CPU::Opcode99()
+	{
+		alu.Sbc(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SBC A, D
+	/// </summary>
+	void CPU::Opcode9A()
+	{
+		alu.Sbc(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SBC A, E
+	/// </summary>
+	void CPU::Opcode9B()
+	{
+		alu.Sbc(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SBC A, H
+	/// </summary>
+	void CPU::Opcode9C()
+	{
+		alu.Sbc(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SBC A, L
+	/// </summary>
+	void CPU::Opcode9D()
+	{
+		alu.Sbc(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// SBC A, (HL)
+	/// </summary>
+	void CPU::Opcode9E()
+	{
+		alu.Sbc(mmu.Read(hl.Value));
+		pc++;
+		cycleCount += 8;
+	}
+
+	/// <summary>
+	/// SBC A, d8
+	/// </summary>
+	void CPU::OpcodeDE()
+	{
+		alu.Sbc(Load8BitImmediateValue());
+		pc += 2;
+		cycleCount += 8;
+	}
+
+#pragma endregion
+
+#pragma region 5. AND n
+
+	/// <summary>
+	/// AND A
+	/// </summary>
+	void CPU::OpcodeA7()
+	{
+		alu.And(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// AND B
+	/// </summary>
+	void CPU::OpcodeA0()
+	{
+		alu.And(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// AND C
+	/// </summary>
+	void CPU::OpcodeA1()
+	{
+		alu.And(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// AND D
+	/// </summary>
+	void CPU::OpcodeA2()
+	{
+		alu.And(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// AND E
+	/// </summary>
+	void CPU::OpcodeA3()
+	{
+		alu.And(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// AND H
+	/// </summary>
+	void CPU::OpcodeA4()
+	{
+		alu.And(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// AND L
+	/// </summary>
+	void CPU::OpcodeA5()
+	{
+		alu.And(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// <summary>
+	/// AND (HL)
+	/// </summary>
+	void CPU::OpcodeA6()
+	{
+		alu.And(mmu.Read(hl.Value));
+		pc++;
+		cycleCount += 8;
+	}
+
+	/// <summary>
+	/// AND d8
+	/// </summary>
+	void CPU::OpcodeE6()
+	{
+		alu.And(Load8BitImmediateValue());
+		pc+=2;
+		cycleCount += 8;
+	}
+
+#pragma endregion
+
+#pragma region 6. OR n
+
+	/// OR A
+	void CPU::OpcodeB7()
+	{
+		alu.OR(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// OR B
+	void CPU::OpcodeB0()
+	{
+		alu.OR(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// OR C
+	void CPU::OpcodeB1()
+	{
+		alu.OR(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// OR D
+	void CPU::OpcodeB2()
+	{
+		alu.OR(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// OR E
+	void CPU::OpcodeB3()
+	{
+		alu.OR(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// OR H
+	void CPU::OpcodeB4()
+	{
+		alu.OR(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// OR L
+	void CPU::OpcodeB5()
+	{
+		alu.OR(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// OR (HL)
+	void CPU::OpcodeB6()
+	{
+		alu.OR(mmu.Read(hl.Value));
+		pc++;
+		cycleCount += 8;
+	}
+
+	/// OR d8
+	void CPU::OpcodeF6()
+	{
+		alu.OR(Load8BitImmediateValue());
+		pc += 2;
+		cycleCount += 8;
+	}
+
+
+#pragma endregion
+
+#pragma region 7. XOR n
+
+	/// XOR A
+	void CPU::OpcodeAF()
+	{
+		alu.XOR(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// XOR B
+	void CPU::OpcodeA8()
+	{
+		alu.XOR(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// XOR C
+	void CPU::OpcodeA9()
+	{
+		alu.XOR(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// XOR D
+	void CPU::OpcodeAA()
+	{
+		alu.XOR(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// XOR E
+	void CPU::OpcodeAB()
+	{
+		alu.XOR(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// XOR H
+	void CPU::OpcodeAC()
+	{
+		alu.XOR(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// XOR L
+	void CPU::OpcodeAD()
+	{
+		alu.XOR(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// XOR (HL)
+	void CPU::OpcodeAE()
+	{
+		alu.XOR(mmu.Read(hl.Value));
+		pc++;
+		cycleCount += 8;
+	}
+
+	/// XOR d8
+	void CPU::OpcodeEE()
+	{
+		alu.XOR(Load8BitImmediateValue());
+		pc += 2;
+		cycleCount += 8;
+	}
 #pragma endregion 
+
+#pragma region 8. CP n
+
+	/// CP A
+	void CPU::OpcodeBF()
+	{
+		alu.CP(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// CP B
+	void CPU::OpcodeB8()
+	{
+		alu.CP(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+	/// CP C
+	void CPU::OpcodeB9()
+	{
+		alu.CP(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+	/// CP D
+	void CPU::OpcodeBA()
+	{
+		alu.CP(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+	/// CP E
+	void CPU::OpcodeBB()
+	{
+		alu.CP(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+	/// CP H
+	void CPU::OpcodeBC()
+	{
+		alu.CP(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+	/// CP L
+	void CPU::OpcodeBD()
+	{
+		alu.CP(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+	/// CP (HL)
+	void CPU::OpcodeBE()
+	{
+		alu.CP(mmu.Read(hl.Value));
+		pc++;
+		cycleCount += 8;
+	}
+	/// CP d8
+	void CPU::OpcodeFE()
+	{
+		alu.CP(Load8BitImmediateValue());
+		pc += 2;
+		cycleCount += 8;
+	}
+#pragma endregion 
+
+#pragma region 9. INC n
+
+	/// INC A
+	void CPU::Opcode3C()
+	{
+		alu.Inc(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// INC B
+	void CPU::Opcode04()
+	{
+		alu.Inc(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// INC C
+	void CPU::Opcode0C()
+	{
+		alu.Inc(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// INC D
+	void CPU::Opcode14()
+	{
+		alu.Inc(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// INC E
+	void CPU::Opcode1C()
+	{
+		alu.Inc(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// INC H
+	void CPU::Opcode24()
+	{
+		alu.Inc(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// INC L
+	void CPU::Opcode2C()
+	{
+		alu.Inc(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// INC (HL)
+	void CPU::Opcode34()
+	{
+		u8 value = mmu.Read(hl.Value);
+		alu.Inc(value);
+		mmu.Write(hl.Value, value);
+		pc++;
+		cycleCount += 12;
+	}
+
+
+#pragma endregion 
+
+#pragma region 10. DEC n
+
+	/// DEC A
+	void CPU::Opcode3D()
+	{
+		alu.Dec(af.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// DEC B
+	void CPU::Opcode05()
+	{
+		alu.Dec(bc.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// DEC C
+	void CPU::Opcode0D()
+	{
+		alu.Dec(bc.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// DEC D
+	void CPU::Opcode15()
+	{
+		alu.Dec(de.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// DEC E
+	void CPU::Opcode1D()
+	{
+		alu.Dec(de.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// DEC H
+	void CPU::Opcode25()
+	{
+		alu.Dec(hl.Hi);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// DEC L
+	void CPU::Opcode2D()
+	{
+		alu.Dec(hl.Lo);
+		pc++;
+		cycleCount += 4;
+	}
+
+	/// DEC (HL)
+	void CPU::Opcode35()
+	{
+		u8 value = mmu.Read(hl.Value);
+		alu.Dec(value);
+		mmu.Write(hl.Value, value);
+		pc++;
+		cycleCount += 12;
+	}
+#pragma endregion 
+
+#pragma endregion 
+
+#pragma region 16-Bit Arithmetic
+
+#pragma region 1. ADD HL,n
+
+	/// ADD HL, BC
+	void CPU::Opcode09()
+	{
+		alu.Add(hl.Value, bc.Value);
+		pc++;
+		cycleCount += 8;
+	}
+	/// ADD HL, DE
+	void CPU::Opcode19()
+	{
+		alu.Add(hl.Value, de.Value);
+		pc++;
+		cycleCount += 8;
+	}
+	/// ADD HL, HL
+	void CPU::Opcode29()
+	{
+		alu.Add(hl.Value, hl.Value);
+		pc++;
+		cycleCount += 8;
+	}
+	/// ADD HL, sp
+	void CPU::Opcode39()
+	{
+		alu.Add(hl.Value, sp.Value);
+		pc++;
+		cycleCount += 8;
+	}
+
+#pragma endregion
+
+#pragma region 2. ADD SP,n
+	
+	void CPU::OpcodeE8()
+	{
+		alu.AddSP(sp.Value, Load8BitImmediateValue());
+		pc += 2;
+		cycleCount += 16;
+	}
+
+#pragma endregion
+
+#pragma region 3. INC nn
+	/// <summary>
+	/// Increment register nn. 
+	/// </summary>
+	/// <param name="reg">BC,DE,HL,SP </param>
+
+	/// INC BC
+	void CPU::Opcode03()
+	{
+		bc++;
+		pc++;
+		cycleCount += 8;
+	}
+
+	/// INC DE
+	void CPU::Opcode13()
+	{
+		de++;
+		pc++;
+		cycleCount += 8;
+
+	}
+
+	/// INC HL
+	void CPU::Opcode23()
+	{
+		hl++;
+		pc++;
+		cycleCount += 8;
+
+	}
+
+	/// INC SP
+	void CPU::Opcode33()
+	{
+		sp++;
+		pc++;
+		cycleCount += 8;
+
+	}
+
+
+#pragma endregion
+
+#pragma region 4. DEC nn
+	/// <summary>
+	/// Decrement register nn. 
+	/// </summary>
+	/// <param name="reg">BC,DE,HL,SP </param>
+	/// DEC BC
+	void CPU::Opcode0B()
+	{
+		bc--;
+		pc++;
+		cycleCount += 8;
+
+	}
+
+	/// DEC DE
+	void CPU::Opcode1B()
+	{
+		de--;
+		pc++;
+		cycleCount += 8;
+
+	}
+
+	/// DEC HL
+	void CPU::Opcode2B()
+	{
+		hl--;
+		pc++;
+		cycleCount += 8;
+
+	}
+
+	/// DEC SP
+	void CPU::Opcode3B()
+	{
+		sp--;
+		pc++;
+		cycleCount += 8;
+
+	}
+#pragma endregion
+#pragma endregion
+
+#pragma region Miscellaneous
+
+#pragma region 1. SWAP n
+	/// <summary>
+	/// Swap upper & lower nibles of n.
+	///	Flags affected :
+	///		Z - Set if result is zero.
+	///		N - Reset.
+	///		H - Reset.
+	///		C - Reset.
+	/// </summary>
+	/// <param name="n"> A, B, C, D, E, H, L, (HL)</param>
+	void CPU::Swap(u8 & n)
+	{
+		u8 upperNibble = (n >> 4) & 0xF;
+		u8 lowerNibble = n & 0xF;
+		u8 result = (lowerNibble << 4) | upperNibble;
+		n = result;
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, result == 0);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+		Utility::SetFlags(af.Lo, CPUFlags::C, false);
+	}
+
+	/// SWAP A
+	void CPU::OpcodeCB_37()
+	{
+		Swap(af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+	/// SWAP B
+	void CPU::OpcodeCB_30()
+	{
+		Swap(bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+	/// SWAP C
+	void CPU::OpcodeCB_31()
+	{
+		Swap(bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+	/// SWAP D
+	void CPU::OpcodeCB_32()
+	{
+		Swap(de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+	/// SWAP E
+	void CPU::OpcodeCB_33()
+	{
+		Swap(de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+	/// SWAP H
+	void CPU::OpcodeCB_34()
+	{
+		Swap(hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+	/// SWAP L
+	void CPU::OpcodeCB_37()
+	{
+		Swap(hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+	/// SWAP (HL)
+	void CPU::OpcodeCB_37()
+	{
+		u8 value = mmu.Read(hl.Value);
+		Swap(value);
+		mmu.Write(hl.Value, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+
+#pragma endregion
+
+#pragma region 2. DAA
+	/// Decimal adjust register A.
+	///	This instruction adjusts register A so that the
+	///	correct representation of Binary Coded Decimal(BCD)
+	///	is obtained.
+	///	Flags affected :
+	///		Z - Set if register A is zero.
+	///		N - Not affected.
+	///		H - Reset.
+	///		C - Set or reset according to operation.
+	void CPU::Opcode27()
+	{
+		u8 a = af.Hi;
+		u8 f = af.Lo;
+
+		if (Utility::IsFlagSet(f, CPUFlags::N))
+		{
+			if (Utility::IsFlagSet(f, CPUFlags::H) || (a & 0xF) > 9)
+			{
+				a += 0x06;
+			}
+
+			if (Utility::IsFlagSet(f, CPUFlags::C) || a > 0x9F)
+			{
+				a += 0x60;
+			}
+		}
+		else
+		{
+			if (Utility::IsFlagSet(f, CPUFlags::H))
+			{
+				a = (a - 6) & 0xFF;
+			}
+
+			if (Utility::IsFlagSet(f, CPUFlags::C))
+			{
+				a -= 0x60;
+			}
+		}		
+
+
+		Utility::SetFlags(f, CPUFlags::H, false);
+
+		if ((a & 0x100) == 0x100)
+		{
+			Utility::SetFlags(f, CPUFlags::C, true);
+		}
+
+		if (a == 0)
+		{
+			Utility::SetFlags(f, CPUFlags::Z, true);
+		}
+
+
+		af.Hi = a;
+
+		pc++;
+		cycleCount += 4;
+	}
+	/*
+	
+This is from my (C#) GB emu, originally based on code posted by Blarrg and passes his GB cpu tests. 
+
+Code:
+private void Daa()
+{
+    int a = _regs.A;
+
+    if (!_regs.F.HasFlag(Flags.N))
+    {
+        if (_regs.F.HasFlag(Flags.H) || (a & 0xF) > 9)
+            a += 0x06;
+
+        if (_regs.F.HasFlag(Flags.C) || a > 0x9F)
+            a += 0x60;
+    }
+    else
+    {
+        if (_regs.F.HasFlag(Flags.H))
+            a = (a - 6) & 0xFF;
+
+        if (_regs.F.HasFlag(Flags.C))
+            a -= 0x60;
+    }
+
+    _regs.F &= ~(Flags.H | Flags.Z);
+
+    if ((a & 0x100) == 0x100)
+        _regs.F |= Flags.C;
+
+    a &= 0xFF;
+
+    if (a == 0)
+        _regs.F |= Flags.Z;
+
+    _regs.A = (byte)a;
+}
+	*/
+
+#pragma endregion
+
+#pragma region 3. CPL
+	/* 
+	CPL
+	Complement A register. (Flip all bits.)
+ 	Flags affected:
+		 Z - Not affected.
+		 N - Set.
+		 H - Set.
+		 C - Not affected.
+	*/
+	void CPU::Opcode2F()
+	{
+		af.Hi = ~af.Hi;
+
+		Utility::SetFlags(af.Lo, CPUFlags::N, true);
+		Utility::SetFlags(af.Lo, CPUFlags::H, true);
+
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 4. CCF
+	/*
+	Complement carry flag.
+	 If C flag is set, then reset it.
+	 If C flag is reset, then set it.
+	Flags affected:
+	 Z - Not affected.
+	 N - Reset.
+	 H - Reset.
+	 C - Complemented.
+	*/
+	void CPU::Opcode3F()
+	{
+		bool setFlag = (Utility::IsFlagSet(af.Lo, CPUFlags::C)) ? false : true;
+
+		Utility::SetFlags(af.Lo, CPUFlags::C, setFlag);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false); 
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 5. SCF
+	/*
+	Description:
+	 Set Carry flag.
+	Flags affected:
+	 Z - Not affected.
+	 N - Reset.
+	 H - Reset.
+	 C - Set.	
+	*/
+	void CPU::Opcode37()
+	{
+		Utility::SetFlags(af.Lo, CPUFlags::C, true);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion 
+
+#pragma region 6. NOP
+	// NOP
+	void CPU::Opcode00()
+	{
+		// just do nothing..
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 7. HALT
+	/// Description :
+	///		Power down CPU until an interrupt occurs.Use this
+	///		when ever possible to reduce energy consumption.
+	void CPU::Opcode76()
+	{
+		halt = true;
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 8. STOP
+	/// Description :
+	///		Halt CPU & LCD display until button pressed.
+	void CPU::Opcode10()
+	{
+		stop = true;
+		pc += 2;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 9. DI
+	/// 
+	/// This instruction disables interrupts but not
+	/// immediately.Interrupts are disabled after
+	/// instruction after DI is executed.
+	void CPU::OpcodeF3()
+	{
+		disableInterrupts = true;
+		pc++;
+		cycleCount += 4;
+	}
+
+#pragma endregion
+
+#pragma region 10. EI
+	/// Enable interrupts.This intruction enables interrupts
+	/// but not immediately.Interrupts are enabled after
+	/// instruction after EI is executed.
+	void CPU::OpcodeFB()
+	{
+		enableInterrupts = true;
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion
+#pragma endregion
+
 }

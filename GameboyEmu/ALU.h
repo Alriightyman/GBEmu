@@ -40,14 +40,14 @@ namespace Gameboy
 	class ALU
 	{
 	private:
-		// keep a copy of the AF Register for flag purposes
-		Register* af;
-
+		// keep a copy of the AF Register
+		Register * af;
 	public:
 		ALU();
 		~ALU();
 		void Initialize(Register* AF);
 
+#pragma region Accumulator operation
 		/* ADD commands 
 			add  A,r         8x         4 z0hc A=A+r
 			add  A,n         C6 nn      8 z0hc A=A+n
@@ -60,7 +60,7 @@ namespace Gameboy
 		// add 16bit value to 16bit register 
 		void Add(u16& hl, u16 n);
 		// add to stack pointer
-		void Add(u16& sp, s8 n);
+		void AddSP(u16& sp, s8 n);
 
 		/* ADC command
 			adc  A,r         8x         4 z0hc A=A+r+cy
@@ -81,35 +81,40 @@ namespace Gameboy
 			sbc  A,n         DE nn      8 z1hc A=A-n-cy
 			sbc  A,(HL)      9E         8 z1hc A=A-(HL)-cy
 		*/
-		void Sbc(u8& a, u8 n);
+		void Sbc(u8 n);
 
 		/* AND commands
 			and  r           Ax         4 z010 A=A & r
 			and  n           E6 nn      8 z010 A=A & n
 			and  (HL)        A6         8 z010 A=A & (HL)
 		*/
-		void And(u8& a, u8 n);
+		void And(u8 n);
 
 		/* XOR commands
 			xor  r           Ax         4 z000
 			xor  n           EE nn      8 z000
 			xor  (HL)        AE         8 z000
 		*/
-		void XOR(u8& a, u8 n);
+		void XOR(u8 n);
 
 		/* OR commands
 			or   r           Bx         4 z000 A=A | r
 			or   n           F6 nn      8 z000 A=A | n
 			or   (HL)        B6         8 z000 A=A | (HL)
 		*/
-		void OR(u8& a, u8 n);
+		void OR(u8 n);
 
 		/* CP commands
 			cp   r           Bx         4 z1hc compare A-r
 			cp   n           FE nn      8 z1hc compare A-n
 			cp   (HL)        BE         8 z1hc compare A-(HL)
 		*/
-		void CP(u8& a, u8 n);
+		void CP( u8 n);
 
+#pragma endregion
+
+		void Inc(u8& reg);
+
+		void Dec(u8& reg);
 	};
 }

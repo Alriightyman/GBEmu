@@ -34,6 +34,17 @@ bool Utility::IsFullCarry16(u16 x, u16 y)
 	return result;
 }
 
+bool Utility::IsFullBorrow(u8 x, u8 y)
+{
+	signed int result = x - y;
+	return result < 0 ? true : false;
+}
+
+bool Utility::IsHalfBorrow(u8 x, u8 y)
+{
+	return (x & 0xf) - (y & 0xf) < 0;
+}
+
 bool Utility::IsFlagSet(u8 flag, u8 mask)
 {
 	u8 result = flag & mask;

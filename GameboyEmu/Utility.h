@@ -18,6 +18,8 @@ public:
 	static bool IsFullCarry(u8 x, u8 y);
 	static bool IsHalfCarry16(u16 x, u16 y);
 	static bool IsFullCarry16(u16 x, u16 y);
+	static bool IsFullBorrow(u8 x, u8 y);
+	static bool IsHalfBorrow(u8 x, u8 y);
 	static bool IsFlagSet(u8 flag, u8 mask);
 	static u8 GetLowByte(u16 word);
 	static u8 GetHighByte(u16 word);
