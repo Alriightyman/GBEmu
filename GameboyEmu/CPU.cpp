@@ -3084,5 +3084,257 @@ private void Daa()
 		cycleCount += 16;
 	}
 #pragma endregion
+#pragma endregion
+#pragma region Bit Opcodes
+#pragma region 1. BIT b,r	/*
+	BIT u3,r8
+		Test bit u3 in register r8, set the zero flag if bit not set.
+		Cycles: 2
+		Bytes: 2
+		Flags:
+		Z: Set if the selected bit is 0.
+		N: 0
+		H: 1
+	*/
+	void CPU::BITbr(u8 BITbr, u8& r)
+	{
+		if ((BITbr >= 0) || (BITbr <= 7))
+		{
+			bool isSet = ((r >> BITbr) & 0x01) == 1;
+
+			Utility::SetFlags(af.Lo, CPUFlags::Z, !isSet);
+		}
+
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, true);
+	}
+
+	// BITbr b, A
+	void CPU::OpcodeCB_47()
+	{
+		BITbr(mmu.Read(pc + 1), af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr b, B
+	void CPU::OpcodeCB_40()
+	{
+		BITbr(mmu.Read(pc + 1), bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr b, C
+	void CPU::OpcodeCB_41()
+	{
+		BITbr(mmu.Read(pc + 1), bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr b, D
+	void CPU::OpcodeCB_42()
+	{
+		BITbr(mmu.Read(pc + 1), de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr b, E
+	void CPU::OpcodeCB_43()
+	{
+		BITbr(mmu.Read(pc + 1), de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr b, H
+	void CPU::OpcodeCB_44()
+	{
+		BITbr(mmu.Read(pc + 1), hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr b, L
+	void CPU::OpcodeCB_45()
+	{
+		BITbr(mmu.Read(pc + 1), hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr b, (HL)
+	void CPU::OpcodeCB_46()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(mmu.Read(pc + 1), value);
+		pc += 2;
+		cycleCount += 16;
+	}
+
 #pragma endregion
+#pragma region 2. SET b,r
+	/* Set bit u3 in register r8 to 1.
+		Cycles: 2
+		Bytes: 2
+		Flags: None affected.
+	*/
+	void CPU::SETbr(u8 bit, u8& r)
+	{
+		if (bit >= 0 || bit <= 7)
+		{
+			r = (1 << bit) | r;
+		}
+	}
+	// SETbr b, A
+	void CPU::OpcodeCB_C7()
+	{
+		SETbr(mmu.Read(pc + 1), af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr b, B
+	void CPU::OpcodeCB_C0()
+	{
+		SETbr(mmu.Read(pc + 1), bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr b, C
+	void CPU::OpcodeCB_C1()
+	{
+		SETbr(mmu.Read(pc + 1), bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr b, D
+	void CPU::OpcodeCB_C2()
+	{
+		SETbr(mmu.Read(pc + 1), de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr b, E
+	void CPU::OpcodeCB_C3()
+	{
+		SETbr(mmu.Read(pc + 1), de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr b, H
+	void CPU::OpcodeCB_C4()
+	{
+		SETbr(mmu.Read(pc + 1), hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr b, L
+	void CPU::OpcodeCB_C5()
+	{
+		SETbr(mmu.Read(pc + 1), hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr b, (HL)
+	void CPU::OpcodeCB_C6()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(mmu.Read(pc + 1), value);
+		pc += 2;
+		cycleCount += 16;
+	}
+
+#pragma endregion
+
+#pragma region 3. RES b,r
+	/*Set bit u3 in register r8 to 0.
+		Cycles: 2
+		Bytes: 2
+		Flags: None affected.
+	*/
+	void CPU::RESbr(u8 bit, u8& r)
+	{
+		if (bit >= 0 || bit <= 7)
+		{
+			r = (0 << bit) | r;
+		}
+	}
+
+	// RESbr b, A
+	void CPU::OpcodeCB_87()
+	{
+		RESbr(mmu.Read(pc + 1), af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr b, B
+	void CPU::OpcodeCB_80()
+	{
+		RESbr(mmu.Read(pc + 1), bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr b, C
+	void CPU::OpcodeCB_81()
+	{
+		RESbr(mmu.Read(pc + 1), bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr b, D
+	void CPU::OpcodeCB_82()
+	{
+		RESbr(mmu.Read(pc + 1), de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr b, E
+	void CPU::OpcodeCB_83()
+	{
+		RESbr(mmu.Read(pc + 1), de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr b, H
+	void CPU::OpcodeCB_84()
+	{
+		RESbr(mmu.Read(pc + 1), hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr b, L
+	void CPU::OpcodeCB_85()
+	{
+		RESbr(mmu.Read(pc + 1), hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr b, (HL)
+	void CPU::OpcodeCB_86()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(mmu.Read(pc + 1), value);
+		pc += 2;
+		cycleCount += 16;
+	}
+#pragma endregion
+
+#pragma endregion
+
 }

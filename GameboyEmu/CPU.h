@@ -617,7 +617,9 @@ namespace Gameboy
 		void SLAn(u8& n);
 		void SRAn(u8& n);
 		void SRLn(u8& n);
-
+		void BITbr(u8 bit, u8& r);
+		void SETbr(u8 bit, u8& r);
+		void RESbr(u8 bit, u8& r);
 #pragma endregion
 
 	};
