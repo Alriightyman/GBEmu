@@ -3104,15 +3104,15 @@ private void Daa()
 
 			Utility::SetFlags(af.Lo, CPUFlags::Z, !isSet);
 		}
-
+		
 		Utility::SetFlags(af.Lo, CPUFlags::N, false);
 		Utility::SetFlags(af.Lo, CPUFlags::H, true);
-	}
+	} 
 
 	// BITbr b, A
 	void CPU::OpcodeCB_47()
 	{
-		BITbr(mmu.Read(pc + 1), af.Hi);
+		BITbr(Load8BitImmediateValue(), af.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3120,7 +3120,7 @@ private void Daa()
 	// BITbr b, B
 	void CPU::OpcodeCB_40()
 	{
-		BITbr(mmu.Read(pc + 1), bc.Hi);
+		BITbr(Load8BitImmediateValue(), bc.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3128,7 +3128,7 @@ private void Daa()
 	// BITbr b, C
 	void CPU::OpcodeCB_41()
 	{
-		BITbr(mmu.Read(pc + 1), bc.Lo);
+		BITbr(Load8BitImmediateValue(), bc.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3136,7 +3136,7 @@ private void Daa()
 	// BITbr b, D
 	void CPU::OpcodeCB_42()
 	{
-		BITbr(mmu.Read(pc + 1), de.Hi);
+		BITbr(Load8BitImmediateValue(), de.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3144,7 +3144,7 @@ private void Daa()
 	// BITbr b, E
 	void CPU::OpcodeCB_43()
 	{
-		BITbr(mmu.Read(pc + 1), de.Lo);
+		BITbr(Load8BitImmediateValue(), de.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3152,7 +3152,7 @@ private void Daa()
 	// BITbr b, H
 	void CPU::OpcodeCB_44()
 	{
-		BITbr(mmu.Read(pc + 1), hl.Hi);
+		BITbr(Load8BitImmediateValue(), hl.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3160,7 +3160,7 @@ private void Daa()
 	// BITbr b, L
 	void CPU::OpcodeCB_45()
 	{
-		BITbr(mmu.Read(pc + 1), hl.Lo);
+		BITbr(Load8BitImmediateValue(), hl.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3169,7 +3169,7 @@ private void Daa()
 	void CPU::OpcodeCB_46()
 	{
 		u8 value = mmu.Read(hl.Value);
-		BITbr(mmu.Read(pc + 1), value);
+		BITbr(Load8BitImmediateValue(), value);
 		pc += 2;
 		cycleCount += 16;
 	}
@@ -3191,7 +3191,7 @@ private void Daa()
 	// SETbr b, A
 	void CPU::OpcodeCB_C7()
 	{
-		SETbr(mmu.Read(pc + 1), af.Hi);
+		SETbr(Load8BitImmediateValue(), af.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3199,7 +3199,7 @@ private void Daa()
 	// SETbr b, B
 	void CPU::OpcodeCB_C0()
 	{
-		SETbr(mmu.Read(pc + 1), bc.Hi);
+		SETbr(Load8BitImmediateValue(), bc.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3207,7 +3207,7 @@ private void Daa()
 	// SETbr b, C
 	void CPU::OpcodeCB_C1()
 	{
-		SETbr(mmu.Read(pc + 1), bc.Lo);
+		SETbr(Load8BitImmediateValue(), bc.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3215,7 +3215,7 @@ private void Daa()
 	// SETbr b, D
 	void CPU::OpcodeCB_C2()
 	{
-		SETbr(mmu.Read(pc + 1), de.Hi);
+		SETbr(Load8BitImmediateValue(), de.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3223,7 +3223,7 @@ private void Daa()
 	// SETbr b, E
 	void CPU::OpcodeCB_C3()
 	{
-		SETbr(mmu.Read(pc + 1), de.Lo);
+		SETbr(Load8BitImmediateValue(), de.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3231,7 +3231,7 @@ private void Daa()
 	// SETbr b, H
 	void CPU::OpcodeCB_C4()
 	{
-		SETbr(mmu.Read(pc + 1), hl.Hi);
+		SETbr(Load8BitImmediateValue(), hl.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3239,7 +3239,7 @@ private void Daa()
 	// SETbr b, L
 	void CPU::OpcodeCB_C5()
 	{
-		SETbr(mmu.Read(pc + 1), hl.Lo);
+		SETbr(Load8BitImmediateValue(), hl.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3248,7 +3248,8 @@ private void Daa()
 	void CPU::OpcodeCB_C6()
 	{
 		u8 value = mmu.Read(hl.Value);
-		SETbr(mmu.Read(pc + 1), value);
+		SETbr(Load8BitImmediateValue(), value);
+		mmu.Write(hl.Value, value);
 		pc += 2;
 		cycleCount += 16;
 	}
@@ -3272,7 +3273,7 @@ private void Daa()
 	// RESbr b, A
 	void CPU::OpcodeCB_87()
 	{
-		RESbr(mmu.Read(pc + 1), af.Hi);
+		RESbr(Load8BitImmediateValue(), af.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3280,7 +3281,7 @@ private void Daa()
 	// RESbr b, B
 	void CPU::OpcodeCB_80()
 	{
-		RESbr(mmu.Read(pc + 1), bc.Hi);
+		RESbr(Load8BitImmediateValue(), bc.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3288,7 +3289,7 @@ private void Daa()
 	// RESbr b, C
 	void CPU::OpcodeCB_81()
 	{
-		RESbr(mmu.Read(pc + 1), bc.Lo);
+		RESbr(Load8BitImmediateValue(), bc.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3296,7 +3297,7 @@ private void Daa()
 	// RESbr b, D
 	void CPU::OpcodeCB_82()
 	{
-		RESbr(mmu.Read(pc + 1), de.Hi);
+		RESbr(Load8BitImmediateValue(), de.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3304,7 +3305,7 @@ private void Daa()
 	// RESbr b, E
 	void CPU::OpcodeCB_83()
 	{
-		RESbr(mmu.Read(pc + 1), de.Lo);
+		RESbr(Load8BitImmediateValue(), de.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3312,7 +3313,7 @@ private void Daa()
 	// RESbr b, H
 	void CPU::OpcodeCB_84()
 	{
-		RESbr(mmu.Read(pc + 1), hl.Hi);
+		RESbr(Load8BitImmediateValue(), hl.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3320,7 +3321,7 @@ private void Daa()
 	// RESbr b, L
 	void CPU::OpcodeCB_85()
 	{
-		RESbr(mmu.Read(pc + 1), hl.Lo);
+		RESbr(Load8BitImmediateValue(), hl.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -3329,12 +3330,187 @@ private void Daa()
 	void CPU::OpcodeCB_86()
 	{
 		u8 value = mmu.Read(hl.Value);
-		RESbr(mmu.Read(pc + 1), value);
+		RESbr(Load8BitImmediateValue(), value);
+		mmu.Write(hl.Value, value);
 		pc += 2;
 		cycleCount += 16;
 	}
 #pragma endregion
 
 #pragma endregion
+#pragma region Jumps
 
+#pragma region 1. JP nn
+	/*
+	Absolute jump to address n16.
+	Cycles: 4
+	Bytes: 3
+	Flags: None affected.
+	*/
+	void CPU::OpcodeC3()
+	{
+		u16 address = Load16BitImmediateValue();
+
+		pc = address;
+		cycleCount += 16;
+	}
+#pragma endregion
+
+#pragma region 2. JP cc,nn	/*Jump to address n if following condition is true:
+		 cc = NZ, Jump if Z flag is reset.
+		 cc = Z, Jump if Z flag is set.
+		 cc = NC, Jump if C flag is reset.
+		 cc = C, Jump if C flag is set.
+	*/
+	// JP NZ, nn
+	void CPU::OpcodeC2()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			u16 address = Load16BitImmediateValue();
+
+			pc = address;
+			cycleCount += 16;
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+	// JP Z, nn
+	void CPU::OpcodeCA()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			u16 address = Load16BitImmediateValue();
+
+			pc = address;
+			cycleCount += 16;
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+	// JP NC, nn
+	void CPU::OpcodeD2()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::C))
+		{
+			u16 address = Load16BitImmediateValue();
+
+			pc = address;
+			cycleCount += 16;
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+	// JP C, nn
+	void CPU::OpcodeDA()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::C))
+		{
+			u16 address = Load16BitImmediateValue();
+
+			pc = address;
+			cycleCount += 16;
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+
+#pragma endregion
+
+#pragma region 3. JP (HL)	// Jump to address contained in HL
+	void CPU::OpcodeE9()
+	{
+		pc = hl.Value;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 4. JR n
+	// Add n to current address and jump to it.
+	void CPU::Opcode18()
+	{
+		pc += Load8BitImmediateValue();
+		cycleCount += 12;
+	}
+#pragma endregion
+
+#pragma region 5. JR cc,n
+	/*If following condition is true then add n to current address and jump to it:
+		Use with:
+		 n = one byte signed immediate value
+		 cc = NZ, Jump if Z flag is reset.
+		 cc = Z, Jump if Z flag is set.
+		 cc = NC, Jump if C flag is reset.
+		 cc = C, Jump if C flag is set.	*/
+	// JR NZ,n
+	void CPU::Opcode20()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			pc += Load8BitImmediateValue();
+			cycleCount += 12;
+		}
+		else
+		{
+			pc += 2;
+			cycleCount += 8;
+		}
+	}
+	// JR Z,n
+	void CPU::Opcode28()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			pc += Load8BitImmediateValue();
+			cycleCount += 12;
+		}
+		else
+		{
+			pc += 2;
+			cycleCount += 8;
+		}
+	}
+	// JR NZ,n
+	void CPU::Opcode30()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::C))
+		{
+			pc += Load8BitImmediateValue();
+			cycleCount += 12;
+		}
+		else
+		{
+			pc += 2;
+			cycleCount += 8;
+		}
+	}
+	// JR NZ,n
+	void CPU::Opcode38()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::C))
+		{
+			pc += Load8BitImmediateValue();
+			cycleCount += 12;
+		}
+		else
+		{
+			pc += 2;
+			cycleCount += 8;
+		}
+	}
+#pragma endregion
+
+#pragma endregion
 }
