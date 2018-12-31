@@ -2222,12 +2222,16 @@ private void Daa()
 
 #pragma region  Rotates & Shifts
 
-#pragma region 1. RLCA	/*	Rotate A left. Old bit 7 to Carry flag.
+#pragma region 1. RLCA
+	/*
+	Rotate A left. Old bit 7 to Carry flag.
 	Flags affected:
 		 Z - Reset.
 		 N - Reset.
 		 H - Reset.
-		 C - Contains old bit 7 data. 	*/	void CPU::Opcode07()
+		 C - Contains old bit 7 data. 
+	*/
+	void CPU::Opcode07()
 	{
 		u8 bit7 = af.Hi & 0x80;
 
@@ -2253,11 +2257,14 @@ private void Daa()
 #pragma endregion
 
 #pragma region 2. RLA
-	/* Rotate A left through Carry flag.	Flags:
+	/* Rotate A left through Carry flag.
+	Flags:
 	Z: 0
 	N: 0
 	H: 0
-	C: Set according to result.	*/	void CPU::Opcode17()
+	C: Set according to result.
+	*/
+	void CPU::Opcode17()
 	{
 		u8 bit7 = af.Hi & 0x80;
 		u8 carry = (u8)Utility::IsFlagSet(af.Lo, CPUFlags::C);
@@ -2438,7 +2445,7 @@ private void Daa()
 		cycleCount += 8;
 	}
 	// RLC (HL)
-	void CPU::OpcodeCB_07()
+	void CPU::OpcodeCB_06()
 	{
 		u8 value = mmu.Read(hl.Value);
 		RLCn(value);
@@ -2659,7 +2666,8 @@ private void Daa()
 
 #pragma endregion
 
-#pragma region 8. RR n	/* Rotate n right through Carry flag.
+#pragma region 8. RR n
+	/* Rotate n right through Carry flag.
 		Use with:
 		 n = A,B,C,D,E,H,L,(HL)
 		Flags affected:
@@ -2766,7 +2774,8 @@ private void Daa()
 
 #pragma endregion
 
-#pragma region 9. SLA n	/*Shift n left into Carry. LSB of n set to 0.
+#pragma region 9. SLA n
+	/*Shift n left into Carry. LSB of n set to 0.
 		C <- [7 <- 0] <- 0
 		Use with:
 		 n = A,B,C,D,E,H,L,(HL)
@@ -2869,7 +2878,8 @@ private void Daa()
 
 #pragma endregion
 
-#pragma region 10. SRA n	/*Shift n right into Carry. MSB doesn't change.
+#pragma region 10. SRA n
+	/*Shift n right into Carry. MSB doesn't change.
 		[7] -> [7 -> 0] -> C
 		Use with:
 		 n = A,B,C,D,E,H,L,(HL)
@@ -2972,7 +2982,8 @@ private void Daa()
 	}
 #pragma endregion
 
-#pragma region 11. SRL n	/*Shift n right into Carry. MSB set to 0.
+#pragma region 11. SRL n
+	/*Shift n right into Carry. MSB set to 0.
 		0 -> [7 -> 0] -> C
 		Use with:
 		 n = A,B,C,D,E,H,L,(HL)
