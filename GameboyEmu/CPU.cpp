@@ -1895,6 +1895,7 @@ namespace Gameboy
 
 	}
 #pragma endregion
+
 #pragma endregion
 
 #pragma region Miscellaneous
@@ -2179,6 +2180,14 @@ private void Daa()
 	void CPU::Opcode10()
 	{
 		stop = true;
+		u8 value = mmu.Read(pc + 1);
+		/*
+		// value must be 0x00
+		if(value != 0x00)
+		{
+			// corrupted stop
+		}
+		*/
 		pc += 2;
 		cycleCount += 4;
 	}
@@ -2211,4 +2220,858 @@ private void Daa()
 #pragma endregion
 #pragma endregion
 
+#pragma region  Rotates & Shifts
+
+#pragma region 1. RLCA	/*	Rotate A left. Old bit 7 to Carry flag.
+	Flags affected:
+		 Z - Reset.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 7 data. 	*/	void CPU::Opcode07()
+	{
+		u8 bit7 = af.Hi & 0x80;
+
+		u8 result = af.Hi << 1;
+		
+		// was bit 7 set?
+		if (bit7 == 1)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+			// since bit 7 was set, we need to set bit 0 since this is a rotate operation
+			result |= bit7;
+		}
+		
+		Utility::SetFlags(af.Lo, CPUFlags::Z, false);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		af.Hi = result;
+
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 2. RLA
+	/* Rotate A left through Carry flag.	Flags:
+	Z: 0
+	N: 0
+	H: 0
+	C: Set according to result.	*/	void CPU::Opcode17()
+	{
+		u8 bit7 = af.Hi & 0x80;
+		u8 carry = (u8)Utility::IsFlagSet(af.Lo, CPUFlags::C);
+
+		u8 result = af.Hi << 1;
+		result |= carry;
+
+		// was bit 7 set?
+		if (bit7 == 1)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+		}
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, false);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		af.Hi = result;
+
+		pc++;
+		cycleCount += 4;
+	}
+#pragma endregion
+
+#pragma region 3. RRCA
+	/* Rotate A right. Old bit 0 to Carry flag.
+		Flags affected:
+		 Z - Reset.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 0 data.
+	*/
+	void CPU::Opcode0F()
+	{
+		u8 bit0 = af.Hi & 0x01;
+		
+		u8 result = af.Hi >> 1;
+
+		if (bit0)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+			
+			result = bit0 << 7 | result;
+		}
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, false);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		af.Hi = result;
+
+		pc++;
+		cycleCount += 4;
+	}
+
+#pragma endregion
+
+#pragma region 4. RRA
+	/* Rotate A right through Carry flag.
+		Flags affected:
+		 Z - Reset.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 0 data.	
+	*/
+	void CPU::Opcode1F()
+	{
+		u8 bit0 = af.Hi & 0x01;
+		u8 carry = Utility::IsFlagSet(af.Lo, CPUFlags::C);
+
+		u8 result = af.Hi >> 1;
+
+		if (bit0)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+		}
+
+		result = carry << 7 | result;
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, false);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		af.Hi = result;
+
+		pc++;
+		cycleCount += 4;
+	}
+
+#pragma endregion
+
+#pragma region 5. RLC n
+	/* Description :
+		Rotate n left. Old bit 7 to Carry flag.
+			Use with :
+		n = A, B, C, D, E, H, L, (HL)
+			Flags affected :
+		Z - Set if result is zero.
+		N - Reset.
+		H - Reset.
+		C - Contains old bit 7 data.
+	*/
+	void CPU::RLCn(u8 & n)
+	{
+		u8 bit7 = n & 0x80;
+
+		u8 result = n << 1;
+
+		// was bit 7 set?
+		if (bit7 == 1)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+			// since bit 7 was set, we need to set bit 0 since this is a rotate operation
+			result |= bit7;
+		}
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, result == 0);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		n = result;
+	}
+
+	// RLC A
+	void CPU::OpcodeCB_07()
+	{
+		RLCn(af.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RLC B
+	void CPU::OpcodeCB_00()
+	{
+		RLCn(bc.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RLC C
+	void CPU::OpcodeCB_01()
+	{
+		RLCn(bc.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RLC D
+	void CPU::OpcodeCB_02()
+	{
+		RLCn(de.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RLC E
+	void CPU::OpcodeCB_03()
+	{
+		RLCn(de.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RLC H
+	void CPU::OpcodeCB_04()
+	{
+		RLCn(hl.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RLC L
+	void CPU::OpcodeCB_05()
+	{
+		RLCn(hl.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RLC (HL)
+	void CPU::OpcodeCB_07()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RLCn(value);
+		mmu.Write(hl.Value, value);
+
+		pc += 2;
+		cycleCount += 16;
+	}
+
+#pragma endregion
+
+#pragma region 6. RL n
+	/*
+		Description:
+		 Rotate n left through Carry flag.
+		Use with:
+		 n = A,B,C,D,E,H,L,(HL)
+		Flags affected:
+		 Z - Set if result is zero.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 7 data
+	*/
+	void CPU::RLn(u8 & n)
+	{
+		u8 bit7 =n & 0x80;
+		u8 carry = (u8)Utility::IsFlagSet(af.Lo, CPUFlags::C);
+
+		u8 result = n << 1;
+		result |= carry;
+
+		// was bit 7 set?
+		if (bit7 == 1)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+		}
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, result == 0);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		n = result;
+	}
+
+	// RL A
+	void CPU::OpcodeCB_17()
+	{
+		RLn(af.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RL B
+	void CPU::OpcodeCB_10()
+	{
+		RLn(bc.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RL C
+	void CPU::OpcodeCB_11()
+	{
+		RLn(bc.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RL D
+	void CPU::OpcodeCB_12()
+	{
+		RLn(de.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RL E
+	void CPU::OpcodeCB_13()
+	{
+		RLn(de.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RL H
+	void CPU::OpcodeCB_14()
+	{
+		RLn(hl.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RL L
+	void CPU::OpcodeCB_15()
+	{
+		RLn(hl.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RL (HL)
+	void CPU::OpcodeCB_16()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RLn(value);
+		mmu.Write(hl.Value, value);
+
+		pc += 2;
+		cycleCount += 16;
+	}
+
+#pragma endregion
+
+#pragma region 7. RRC n
+	/* Rotate n right. Old bit 0 to Carry flag.
+		Use with:
+		n = A,B,C,D,E,H,L,(HL)
+		Flags affected:
+		 Z - Set if result is zero.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 0 data.	
+	*/
+	void CPU::RRCn(u8 & n)
+	{
+		u8 bit0 = n & 0x01;
+
+		u8 result = n >> 1;
+
+		if (bit0)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+
+			result = bit0 << 7 | result;
+		}
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, false);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		n = result;
+	}
+
+	// RRC A
+	void CPU::OpcodeCB_0F()
+	{
+		RRCn(af.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RRC B
+	void CPU::OpcodeCB_08()
+	{
+		RRCn(bc.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RRC C
+	void CPU::OpcodeCB_09()
+	{
+		RRCn(bc.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RRC D
+	void CPU::OpcodeCB_0A()
+	{
+		RRCn(de.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RRC E
+	void CPU::OpcodeCB_0B()
+	{
+		RRCn(de.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RRC H
+	void CPU::OpcodeCB_0C()
+	{
+		RRCn(hl.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RRC L
+	void CPU::OpcodeCB_0D()
+	{
+		RRCn(hl.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+	// RRC (HL)
+	void CPU::OpcodeCB_0E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RRCn(value);
+		mmu.Write(hl.Value, value);
+
+		pc += 2;
+		cycleCount += 16;
+	}
+
+#pragma endregion
+
+#pragma region 8. RR n	/* Rotate n right through Carry flag.
+		Use with:
+		 n = A,B,C,D,E,H,L,(HL)
+		Flags affected:
+		 Z - Set if result is zero.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 0 data
+	*/
+	void CPU::RRn(u8 & n)
+	{
+		u8 bit0 = n & 0x01;
+		u8 carry = Utility::IsFlagSet(af.Lo, CPUFlags::C);
+
+		u8 result = n >> 1;
+
+		if (bit0)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+		}
+
+		result = carry << 7 | result;
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, result == 0);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		n = result;
+	}
+
+	// RR A
+	void CPU::OpcodeCB_1F()
+	{
+		RRn(af.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RR B
+	void CPU::OpcodeCB_18()
+	{
+		RRn(bc.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RR C
+	void CPU::OpcodeCB_19()
+	{
+		RRn(bc.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RR D
+	void CPU::OpcodeCB_1A()
+	{
+		RRn(de.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RR E
+	void CPU::OpcodeCB_1B()
+	{
+		RRn(de.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RR H
+	void CPU::OpcodeCB_1C()
+	{
+		RRn(hl.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RR L
+	void CPU::OpcodeCB_1D()
+	{
+		RRn(hl.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RR (HL)
+	void CPU::OpcodeCB_1E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RRn(value);
+		mmu.Write(hl.Value, value);
+
+		pc += 2;
+		cycleCount += 16;
+	}
+
+
+#pragma endregion
+
+#pragma region 9. SLA n	/*Shift n left into Carry. LSB of n set to 0.
+		C <- [7 <- 0] <- 0
+		Use with:
+		 n = A,B,C,D,E,H,L,(HL)
+		Flags affected:
+		 Z - Set if result is zero.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 7 data.
+	 */
+	void CPU::SLAn(u8 & n)
+	{
+		u8 bit7 = n & 0x80;
+		u8 result = n << 1;
+
+		if (bit7)
+		{
+			Utility::SetFlags(af.Lo, CPUFlags::C, true);
+		}
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, result == 0);
+		Utility::SetFlags(af.Lo, CPUFlags::C, false);
+		Utility::SetFlags(af.Lo, CPUFlags::C, false);
+
+		n = result;
+	}
+
+	// SLA A
+	void CPU::OpcodeCB_27()
+	{
+		SLAn(af.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SLA B
+	void CPU::OpcodeCB_20()
+	{
+		SLAn(bc.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SLA C
+	void CPU::OpcodeCB_21()
+	{
+		SLAn(bc.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SLA D
+	void CPU::OpcodeCB_22()
+	{
+		SLAn(de.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SLA E
+	void CPU::OpcodeCB_23()
+	{
+		SLAn(de.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SLA H
+	void CPU::OpcodeCB_24()
+	{
+		SLAn(hl.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SLA L
+	void CPU::OpcodeCB_25()
+	{
+		SLAn(hl.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SLA (HL)
+	void CPU::OpcodeCB_26()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SLAn(value);
+		mmu.Write(hl.Value, value);
+
+		pc += 2;
+		cycleCount += 16;
+	}
+
+#pragma endregion
+
+#pragma region 10. SRA n	/*Shift n right into Carry. MSB doesn't change.
+		[7] -> [7 -> 0] -> C
+		Use with:
+		 n = A,B,C,D,E,H,L,(HL)
+		Flags affected:
+		 Z - Set if result is zero.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 0 data.
+	*/
+	void CPU::SRAn(u8& n)
+	{
+		u8 bit7 = n & 0x80;
+		u8 bit0 = n & 0x01;
+
+		u8 result = n >> 1;
+
+		Utility::SetFlags(af.Lo, CPUFlags::C, bit0 == 1);
+
+		result = bit7 << 7 | result;
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, result == 0);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		n = result;
+	}
+
+	// SRA A
+	void CPU::OpcodeCB_2F()
+	{
+		SRAn(af.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRA B
+	void CPU::OpcodeCB_28()
+	{
+		SRAn(bc.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRA C
+	void CPU::OpcodeCB_29()
+	{
+		SRAn(bc.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRA D
+	void CPU::OpcodeCB_2A()
+	{
+		SRAn(de.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRA E
+	void CPU::OpcodeCB_2B()
+	{
+		SRAn(de.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRA H
+	void CPU::OpcodeCB_2C()
+	{
+		SRAn(hl.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRA L
+	void CPU::OpcodeCB_2D()
+	{
+		SRAn(hl.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRA (HL)
+	void CPU::OpcodeCB_2E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SRAn(value);
+		mmu.Write(hl.Value, value);
+
+		pc += 2;
+		cycleCount += 16;
+	}
+#pragma endregion
+
+#pragma region 11. SRL n	/*Shift n right into Carry. MSB set to 0.
+		0 -> [7 -> 0] -> C
+		Use with:
+		 n = A,B,C,D,E,H,L,(HL)
+		Flags affected:
+		 Z - Set if result is zero.
+		 N - Reset.
+		 H - Reset.
+		 C - Contains old bit 0 data.
+	*/
+	void CPU::SRLn(u8 & n)
+	{
+		u8 bit0 = n & 0x01;
+
+		u8 result = n >> 1;
+
+		Utility::SetFlags(af.Lo, CPUFlags::C, bit0 == 1);
+
+		result = 0 << 7 | result;
+
+		Utility::SetFlags(af.Lo, CPUFlags::Z, result == 0);
+		Utility::SetFlags(af.Lo, CPUFlags::N, false);
+		Utility::SetFlags(af.Lo, CPUFlags::H, false);
+
+		n = result;
+	}
+
+	// SRL A
+	void CPU::OpcodeCB_3F()
+	{
+		SRLn(af.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRL B
+	void CPU::OpcodeCB_38()
+	{
+		SRLn(bc.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRL C
+	void CPU::OpcodeCB_39()
+	{
+		SRLn(bc.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRL D
+	void CPU::OpcodeCB_3A()
+	{
+		SRLn(de.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRL E
+	void CPU::OpcodeCB_3B()
+	{
+		SRLn(de.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRL H
+	void CPU::OpcodeCB_3C()
+	{
+		SRLn(hl.Hi);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRL L
+	void CPU::OpcodeCB_3D()
+	{
+		SRLn(hl.Lo);
+
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SRL (HL)
+	void CPU::OpcodeCB_3E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SRLn(value);
+		mmu.Write(hl.Value, value);
+
+		pc += 2;
+		cycleCount += 16;
+	}
+#pragma endregion
+#pragma endregion
 }

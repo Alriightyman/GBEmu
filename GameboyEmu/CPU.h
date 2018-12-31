@@ -86,7 +86,8 @@ namespace Gameboy
 		void UpdateTimers();
 		void UpdateGraphics();
 		void RunInterrupts();
-#pragma region Opcodes
+	
+		#pragma region Opcodes
 		void Opcode00();
 		void Opcode01();
 		void Opcode02();
@@ -609,6 +610,13 @@ namespace Gameboy
 		void Push(u16 value);
 		u16 Pop();
 		void Swap(u8& n);
+		void RLCn(u8& n);
+		void RLn(u8& n);
+		void RRCn(u8& n);
+		void RRn(u8& n);
+		void SLAn(u8& n);
+		void SRAn(u8& n);
+		void SRLn(u8& n);
 
 #pragma endregion
 
