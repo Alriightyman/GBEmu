@@ -3513,4 +3513,83 @@ private void Daa()
 #pragma endregion
 
 #pragma endregion
+
+#pragma region  Calls
+
+#pragma region 1. CALL nn	/*Push address of next instruction onto stack and then
+	  jump to address nn.*/
+	void CPU::OpcodeCD()
+	{
+		u16 address = Load16BitImmediateValue();
+		pc += 3;
+		mmu.Push(sp, pc.Value);
+
+		pc = address;
+		cycleCount += 24;
+	}
+#pragma endregion
+
+#pragma region 2. CALL cc,nn
+	/*Call address n if following condition is true:
+		 cc = NZ, Call if Z flag is reset.
+		 cc = Z, Call if Z flag is set.
+		 cc = NC, Call if C flag is reset.
+		 cc = C, Call if C flag is set.
+		Use with:
+		 nn = two byte immediate value. (LS byte first.)*/
+	// CALL NZ, nn
+	void CPU::OpcodeC4()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			OpcodeCD(); // Call
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+	// CALL Z, nn
+	void CPU::OpcodeCC()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			OpcodeCC(); // Call
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+	// CALL NC, nn
+	void CPU::OpcodeD4()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::C))
+		{
+			OpcodeCD(); // Call
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+	// CALL C, nn
+	void CPU::OpcodeDC()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::C))
+		{
+			OpcodeCD(); // Call
+		}
+		else
+		{
+			pc += 3;
+			cycleCount += 12;
+		}
+	}
+#pragma endregion
+
+#pragma endregion
 }
