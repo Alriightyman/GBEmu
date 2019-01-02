@@ -1,10 +1,13 @@
 #pragma once
 #include <CPU.h>
+#include <memory>
 
 class Emulator
 {
 private:
-	Gameboy::CPU cpu;
+	std::unique_ptr<Gameboy::CPU> cpu;
+	std::unique_ptr<Gameboy::MMU> mmu;
+
 	bool m_isRunning;
 	char* cartridgeMemory; // [0x200000];
 public:

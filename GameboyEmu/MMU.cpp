@@ -39,9 +39,25 @@ namespace Gameboy
 		return memory[address];
 	}
 
-	void MMU::Write(u16 address, u8 value)
+	void MMU::Write(u16 address, u8 data)
 	{
-		memory[address] = value;
+		if (address < VRAM) // cannot write to ROM 
+		{
+			// cannot write here
+		}
+		else if ((address >= ECHORAM) && (address < OAM))
+		{
+			memory[address] = data;
+			Write(address - 0x2000, data);
+		}
+		else if ((address >= RESERVED) && (address < 0xFEFF))
+		{
+			// reserved
+		}
+		else
+		{
+			memory[address] = data;
+		}		
 	}
 
 	void MMU::Write(u16 address, u16 value)

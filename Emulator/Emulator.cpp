@@ -1,10 +1,14 @@
 #include "Emulator.h"
 #include "Debug.h"
 #include <fstream>
+using namespace Gameboy;
 
 Emulator::Emulator(void) : m_isRunning(false)
 {
 	cartridgeMemory = new char[0x200000];
+
+	// setup the CPU
+	cpu.reset(new CPU(mmu.get()));
 }
 
 
@@ -41,13 +45,13 @@ void Emulator::LoadROM(const char * rom)
 
 void Emulator::Run()
 {
-	while (!cpu.IsUpdateFinished())
+	while (!cpu->IsUpdateFinished())
 	{
-		int cycles = cpu.ExecuteOpcode();
-		Debug::Print(cpu);
-		cpu.UpdateTimers();
+		int cycles = cpu->ExecuteOpcode();
+		Debug::Print(*cpu);
+		cpu->UpdateTimers();
 		//ppu.UpdateGraphics(cycles);
-		cpu.RunInterrupts();
+		cpu->RunInterrupts();
 	}
 
 	// RenderScreen();

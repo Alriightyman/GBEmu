@@ -6,13 +6,18 @@ namespace Gameboy
 {
 	using CPUFlags = Utility::Flags;
 
-	CPU::CPU() : cycleCount(0x00), halt(false), stop(false), disableInterrupts(false), enableInterrupts(false)
+	CPU::CPU(MMU* mmu) : cycleCount(0x00), halt(false), stop(false), disableInterrupts(false), enableInterrupts(false)
 	{
 		af = 0x01B0;
 		bc = 0x0013; 
 		de = 0x00D8;
 		hl = 0x014D;
 		sp = 0xFFFE;
+	}
+
+	CPU::CPU()
+	{
+
 	}
 
 	CPU::~CPU()
@@ -44,20 +49,20 @@ namespace Gameboy
 
 	u8 CPU::Load8BitImmediateValue()
 	{
-		return mmu.Read(pc + 1);
+		return mmu->Read(pc + 1);
 	}
 
 	u16 CPU::Load16BitImmediateValue()
 	{
-		u8 lo = mmu.Read(pc + 1);
-		u8 hi = mmu.Read(pc + 2);
+		u8 lo = mmu->Read(pc + 1);
+		u8 hi = mmu->Read(pc + 2);
 
 		return (hi << 8) | lo;
 	}
 
 	int CPU::ExecuteOpcode()
 	{
-		u8 opcode = mmu.Read(pc.Value);
+		u8 opcode = mmu->Read(pc.Value);
 		OpcodeFunction opcodeMethod = Opcodes[opcode];
 		(this->*opcodeMethod)();
 
@@ -195,7 +200,7 @@ namespace Gameboy
 	// LD A, (HL)
 	void CPU::Opcode7E()
 	{
-		LD(af.Hi, mmu.Read(hl.Value));
+		LD(af.Hi, mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -245,7 +250,7 @@ namespace Gameboy
 	// LD B, (HL)
 	void CPU::Opcode46()
 	{
-		LD(bc.Hi, mmu.Read(hl.Value));
+		LD(bc.Hi, mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -294,7 +299,7 @@ namespace Gameboy
 	// LD C, (HL)
 	void CPU::Opcode4E()
 	{
-		LD(bc.Lo, mmu.Read(hl.Value));
+		LD(bc.Lo, mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -343,7 +348,7 @@ namespace Gameboy
 	// LD D, (HL)
 	void CPU::Opcode56()
 	{
-		LD(de.Hi, mmu.Read(hl.Value));
+		LD(de.Hi, mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -392,7 +397,7 @@ namespace Gameboy
 	// LD E, (HL)
 	void CPU::Opcode5E()
 	{
-		LD(de.Lo, mmu.Read(hl.Value));
+		LD(de.Lo, mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -441,7 +446,7 @@ namespace Gameboy
 	// LD H, (HL)
 	void CPU::Opcode66()
 	{
-		LD(hl.Hi, mmu.Read(hl.Value));
+		LD(hl.Hi, mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -490,56 +495,56 @@ namespace Gameboy
 	// LD L, (HL)
 	void CPU::Opcode6E()
 	{
-		LD(hl.Lo, mmu.Read(hl.Value));
+		LD(hl.Lo, mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), B
 	void CPU::Opcode70()
 	{
-		mmu.Write(hl.Value, bc.Hi);
+		mmu->Write(hl.Value, bc.Hi);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), C
 	void CPU::Opcode71()
 	{
-		mmu.Write(hl.Value, bc.Lo);
+		mmu->Write(hl.Value, bc.Lo);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), D
 	void CPU::Opcode72()
 	{
-		mmu.Write(hl.Value, de.Hi);
+		mmu->Write(hl.Value, de.Hi);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), E
 	void CPU::Opcode73()
 	{
-		mmu.Write(hl.Value, de.Lo);
+		mmu->Write(hl.Value, de.Lo);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), H
 	void CPU::Opcode74()
 	{
-		mmu.Write(hl.Value, hl.Hi);
+		mmu->Write(hl.Value, hl.Hi);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), L
 	void CPU::Opcode75()
 	{
-		mmu.Write(hl.Value, hl.Lo);
+		mmu->Write(hl.Value, hl.Lo);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), n
 	void CPU::Opcode36()
 	{
-		mmu.Write(hl.Value, Load8BitImmediateValue());
+		mmu->Write(hl.Value, Load8BitImmediateValue());
 		pc+=2;
 		cycleCount += 12;
 	}
@@ -557,21 +562,21 @@ namespace Gameboy
 	// LD A, (BC)
 	void CPU::Opcode0A()
 	{
-		LD(af.Hi, mmu.Read(bc.Value));
+		LD(af.Hi, mmu->Read(bc.Value));
 		pc++;
 		cycleCount += 8;
 	}
 	// LD A, (DE)
 	void CPU::Opcode1A()
 	{
-		LD(af.Hi, mmu.Read(de.Value));
+		LD(af.Hi, mmu->Read(de.Value));
 		pc++;
 		cycleCount += 8;
 	}
 	// LD A, (nn)
 	void CPU::OpcodeFA()
 	{
-		LD(af.Hi, mmu.Read(Load16BitImmediateValue()));
+		LD(af.Hi, mmu->Read(Load16BitImmediateValue()));
 		pc += 3;
 		cycleCount += 16;
 	}
@@ -630,28 +635,28 @@ namespace Gameboy
 	// LD (BC), A
 	void CPU::Opcode02()
 	{
-		mmu.Write(bc.Value, af.Hi);
+		mmu->Write(bc.Value, af.Hi);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (DE), A
 	void CPU::Opcode12()
 	{
-		mmu.Write(de.Value, af.Hi);
+		mmu->Write(de.Value, af.Hi);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (HL), A
 	void CPU::Opcode77()
 	{
-		mmu.Write(hl.Value, af.Hi);
+		mmu->Write(hl.Value, af.Hi);
 		pc++;
 		cycleCount += 8;
 	}
 	// LD (nn), A
 	void CPU::OpcodeEA()
 	{
-		mmu.Write(Load16BitImmediateValue(), af.Hi);
+		mmu->Write(Load16BitImmediateValue(), af.Hi);
 		pc += 3;
 		cycleCount += 16;
 	}
@@ -665,7 +670,7 @@ namespace Gameboy
 	//	   Same as : LD A, ($FF00 + C)
 	void CPU::OpcodeF2()
 	{
-		LD(af.Hi, mmu.Read(0xFF00 + bc.Lo));
+		LD(af.Hi, mmu->Read(0xFF00 + bc.Lo));
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -677,7 +682,7 @@ namespace Gameboy
 	//		Put A into address $FF00 + register C.
 	void CPU::OpcodeE2()
 	{
-		mmu.Write((0xFF0 + bc.Lo), af.Hi);
+		mmu->Write((0xFF0 + bc.Lo), af.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
@@ -689,7 +694,7 @@ namespace Gameboy
 	//	Same as : LD A, (HL)-DEC HL
 	void CPU::Opcode3A()
 	{
-		LD(af.Hi, mmu.Read(hl.Value));
+		LD(af.Hi, mmu->Read(hl.Value));
 		hl--;
 		pc++;
 		cycleCount += 8;
@@ -702,7 +707,7 @@ namespace Gameboy
 	//	Same as : LD (HL), A - DEC HL
 	void CPU::Opcode32()
 	{
-		mmu.Write(hl.Value, af.Hi);
+		mmu->Write(hl.Value, af.Hi);
 		hl--;
 		pc++;
 		cycleCount += 8;
@@ -715,7 +720,7 @@ namespace Gameboy
 	//		Same as : LD A, (HL)-INC HL
 	void CPU::Opcode2A()
 	{
-		LD(af.Hi, mmu.Read(hl.Value));
+		LD(af.Hi, mmu->Read(hl.Value));
 		hl++;
 		pc++;
 		cycleCount += 8;
@@ -728,7 +733,7 @@ namespace Gameboy
 		//	  Same as : LD (HL), A - INC HL
 	void CPU::Opcode22()
 	{
-		mmu.Write(hl.Value, af.Hi);
+		mmu->Write(hl.Value, af.Hi);
 		hl++;
 		pc++;
 		cycleCount += 8;
@@ -742,7 +747,7 @@ namespace Gameboy
 	//	 		n = one byte immediate value.
 	void CPU::OpcodeE0()
 	{
-		mmu.Write((0xff00 + Load8BitImmediateValue()), af.Hi);
+		mmu->Write((0xff00 + Load8BitImmediateValue()), af.Hi);
 		pc += 2;
 		cycleCount += 12;
 	}
@@ -755,7 +760,7 @@ namespace Gameboy
 	//		   n = one byte immediate value.
 	void CPU::OpcodeF0()
 	{
-		LD(af.Hi, mmu.Read(0xFF00 + Load8BitImmediateValue()));
+		LD(af.Hi, mmu->Read(0xFF00 + Load8BitImmediateValue()));
 		pc += 2;
 		cycleCount += 12;
 	}
@@ -868,7 +873,7 @@ namespace Gameboy
 	/// </summary>
 	void CPU::Opcode08()
 	{
-		mmu.Write(Load16BitImmediateValue(), sp.Value);
+		mmu->Write(Load16BitImmediateValue(), sp.Value);
 		pc += 3;
 		cycleCount += 20;
 
@@ -882,8 +887,8 @@ namespace Gameboy
 		u8 hiByte = Utility::GetHighByte(value);
 		u8 loByte = Utility::GetLowByte(value);
 
-		mmu.Write(sp - 1, hiByte);
-		mmu.Write(sp - 2, loByte);
+		mmu->Write(sp - 1, hiByte);
+		mmu->Write(sp - 2, loByte);
 
 		sp -= 2;
 		
@@ -937,8 +942,8 @@ namespace Gameboy
 	/// <returns> a word value from the stack</returns>
 	u16 CPU::Pop()
 	{
-		u8 loByte = mmu.Read(sp.Value);
-		u8 hiByte = mmu.Read(sp.Value + 1);
+		u8 loByte = mmu->Read(sp.Value);
+		u8 hiByte = mmu->Read(sp.Value + 1);
 		pc += 2;
 
 		return (hiByte << 8) | loByte;
@@ -1053,7 +1058,7 @@ namespace Gameboy
 	/// </summary>
 	void CPU::Opcode86()
 	{
-		alu.Add(mmu.Read(hl.Value));
+		alu.Add(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1146,7 +1151,7 @@ namespace Gameboy
 	/// </summary>
 	void CPU::Opcode8E()
 	{
-		alu.Adc(mmu.Read(hl.Value));
+		alu.Adc(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1240,7 +1245,7 @@ namespace Gameboy
 	/// </summary>
 	void CPU::Opcode96()
 	{
-		alu.Sub(mmu.Read(hl.Value));
+		alu.Sub(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1332,7 +1337,7 @@ namespace Gameboy
 	/// </summary>
 	void CPU::Opcode9E()
 	{
-		alu.Sbc(mmu.Read(hl.Value));
+		alu.Sbc(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1426,7 +1431,7 @@ namespace Gameboy
 	/// </summary>
 	void CPU::OpcodeA6()
 	{
-		alu.And(mmu.Read(hl.Value));
+		alu.And(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1504,7 +1509,7 @@ namespace Gameboy
 	/// OR (HL)
 	void CPU::OpcodeB6()
 	{
-		alu.OR(mmu.Read(hl.Value));
+		alu.OR(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1581,7 +1586,7 @@ namespace Gameboy
 	/// XOR (HL)
 	void CPU::OpcodeAE()
 	{
-		alu.XOR(mmu.Read(hl.Value));
+		alu.XOR(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1650,7 +1655,7 @@ namespace Gameboy
 	/// CP (HL)
 	void CPU::OpcodeBE()
 	{
-		alu.CP(mmu.Read(hl.Value));
+		alu.CP(mmu->Read(hl.Value));
 		pc++;
 		cycleCount += 8;
 	}
@@ -1724,9 +1729,9 @@ namespace Gameboy
 	/// INC (HL)
 	void CPU::Opcode34()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		alu.Inc(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 		pc++;
 		cycleCount += 12;
 	}
@@ -1795,9 +1800,9 @@ namespace Gameboy
 	/// DEC (HL)
 	void CPU::Opcode35()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		alu.Dec(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 		pc++;
 		cycleCount += 12;
 	}
@@ -2016,9 +2021,9 @@ namespace Gameboy
 	/// SWAP (HL)
 	void CPU::OpcodeCB_36()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		Swap(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 		pc += 2;
 		cycleCount += 16;
 	}
@@ -2221,7 +2226,7 @@ private void Daa()
 	void CPU::Opcode10()
 	{
 		stop = true;
-		u8 value = mmu.Read(pc + 1);
+		u8 value = mmu->Read(pc + 1);
 		/*
 		// value must be 0x00
 		if(value != 0x00)
@@ -2488,9 +2493,9 @@ private void Daa()
 	// RLC (HL)
 	void CPU::OpcodeCB_06()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RLCn(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 
 		pc += 2;
 		cycleCount += 16;
@@ -2597,9 +2602,9 @@ private void Daa()
 	// RL (HL)
 	void CPU::OpcodeCB_16()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RLn(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 
 		pc += 2;
 		cycleCount += 16;
@@ -2697,9 +2702,9 @@ private void Daa()
 	// RRC (HL)
 	void CPU::OpcodeCB_0E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RRCn(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 
 		pc += 2;
 		cycleCount += 16;
@@ -2804,9 +2809,9 @@ private void Daa()
 	// RR (HL)
 	void CPU::OpcodeCB_1E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RRn(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 
 		pc += 2;
 		cycleCount += 16;
@@ -2909,9 +2914,9 @@ private void Daa()
 	// SLA (HL)
 	void CPU::OpcodeCB_26()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SLAn(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 
 		pc += 2;
 		cycleCount += 16;
@@ -3014,9 +3019,9 @@ private void Daa()
 	// SRA (HL)
 	void CPU::OpcodeCB_2E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SRAn(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 
 		pc += 2;
 		cycleCount += 16;
@@ -3117,9 +3122,9 @@ private void Daa()
 	// SRL (HL)
 	void CPU::OpcodeCB_3E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SRLn(value);
-		mmu.Write(hl.Value, value);
+		mmu->Write(hl.Value, value);
 
 		pc += 2;
 		cycleCount += 16;
@@ -3211,7 +3216,7 @@ private void Daa()
 	// BITbr 0, (HL)
 	void CPU::OpcodeCB_46()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(0, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3275,7 +3280,7 @@ private void Daa()
 	// BITbr 1, (HL)
 	void CPU::OpcodeCB_4E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(1, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3339,7 +3344,7 @@ private void Daa()
 	// BITbr 2, (HL)
 	void CPU::OpcodeCB_56()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(2, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3403,7 +3408,7 @@ private void Daa()
 	// BITbr 3, (HL)
 	void CPU::OpcodeCB_5E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(3, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3467,7 +3472,7 @@ private void Daa()
 	// BITbr 4, (HL)
 	void CPU::OpcodeCB_66()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(4, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3531,7 +3536,7 @@ private void Daa()
 	// BITbr 5, (HL)
 	void CPU::OpcodeCB_6E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(5, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3595,7 +3600,7 @@ private void Daa()
 	// BITbr 6, (HL)
 	void CPU::OpcodeCB_76()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(6, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3659,7 +3664,7 @@ private void Daa()
 	// BITbr 7, (HL)
 	void CPU::OpcodeCB_7E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		BITbr(7, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3735,7 +3740,7 @@ private void Daa()
 	// SETbr 0, (HL)
 	void CPU::OpcodeCB_C6()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(0, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3799,7 +3804,7 @@ private void Daa()
 	// SETbr 1, (HL)
 	void CPU::OpcodeCB_CE()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(1, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3863,7 +3868,7 @@ private void Daa()
 	// SETbr 2, (HL)
 	void CPU::OpcodeCB_D6()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(2, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3927,7 +3932,7 @@ private void Daa()
 	// SETbr 3, (HL)
 	void CPU::OpcodeCB_DE()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(3, value);
 		pc += 2;
 		cycleCount += 16;
@@ -3991,7 +3996,7 @@ private void Daa()
 	// SETbr 4, (HL)
 	void CPU::OpcodeCB_E6()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(4, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4055,7 +4060,7 @@ private void Daa()
 	// SETbr 5, (HL)
 	void CPU::OpcodeCB_EE()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(5, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4119,7 +4124,7 @@ private void Daa()
 	// SETbr 6, (HL)
 	void CPU::OpcodeCB_F6()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(6, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4183,7 +4188,7 @@ private void Daa()
 	// SETbr 7, (HL)
 	void CPU::OpcodeCB_FE()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		SETbr(7, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4263,7 +4268,7 @@ private void Daa()
 	// RESbr 0, (HL)
 	void CPU::OpcodeCB_86()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(0, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4327,7 +4332,7 @@ private void Daa()
 	// RESbr 1, (HL)
 	void CPU::OpcodeCB_8E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(1, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4391,7 +4396,7 @@ private void Daa()
 	// RESbr 2, (HL)
 	void CPU::OpcodeCB_96()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(2, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4455,7 +4460,7 @@ private void Daa()
 	// RESbr 3, (HL)
 	void CPU::OpcodeCB_9E()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(3, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4519,7 +4524,7 @@ private void Daa()
 	// RESbr 4, (HL)
 	void CPU::OpcodeCB_A6()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(4, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4583,7 +4588,7 @@ private void Daa()
 	// RESbr 5, (HL)
 	void CPU::OpcodeCB_AE()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(5, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4647,7 +4652,7 @@ private void Daa()
 	// RESbr 6, (HL)
 	void CPU::OpcodeCB_B6()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(6, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4711,7 +4716,7 @@ private void Daa()
 	// RESbr 7, (HL)
 	void CPU::OpcodeCB_BE()
 	{
-		u8 value = mmu.Read(hl.Value);
+		u8 value = mmu->Read(hl.Value);
 		RESbr(7, value);
 		pc += 2;
 		cycleCount += 16;
@@ -4910,7 +4915,7 @@ private void Daa()
 	{
 		u16 address = Load16BitImmediateValue();
 		pc += 3;
-		mmu.Push(sp, pc.Value);
+		mmu->Push(sp, pc.Value);
 
 		pc = address;
 		cycleCount += 24;
@@ -5048,7 +5053,7 @@ private void Daa()
 	// Pop two bytes from stack & jump to that address.	
 	void CPU::OpcodeC9()
 	{
-		u8 address = mmu.Pop(sp);
+		u8 address = mmu->Pop(sp);
 		pc = address;
 		cycleCount += 16;
 	}
@@ -5067,7 +5072,7 @@ private void Daa()
 	{
 		if (!Utility::IsFlagSet(af.Lo, CPUFlags::Z))
 		{
-			u8 address = mmu.Pop(sp);
+			u8 address = mmu->Pop(sp);
 			pc = address;
 			cycleCount += 20;
 		}
@@ -5082,7 +5087,7 @@ private void Daa()
 	{
 		if (Utility::IsFlagSet(af.Lo, CPUFlags::Z))
 		{
-			u8 address = mmu.Pop(sp);
+			u8 address = mmu->Pop(sp);
 			pc = address;
 			cycleCount += 20;
 		}
@@ -5096,7 +5101,7 @@ private void Daa()
 	{
 		if (!Utility::IsFlagSet(af.Lo, CPUFlags::N))
 		{
-			u8 address = mmu.Pop(sp);
+			u8 address = mmu->Pop(sp);
 			pc = address;
 			cycleCount += 20;
 		}
@@ -5110,7 +5115,7 @@ private void Daa()
 	{
 		if (Utility::IsFlagSet(af.Lo, CPUFlags::C))
 		{
-			u8 address = mmu.Pop(sp);
+			u8 address = mmu->Pop(sp);
 			pc = address;
 			cycleCount += 20;
 		}
@@ -5126,7 +5131,7 @@ private void Daa()
 	// Pop two bytes from stack & jump to that address then enable interrupts.
 	void CPU::OpcodeD9()
 	{
-		u8 address = mmu.Pop(sp);
+		u8 address = mmu->Pop(sp);
 		pc = address;
 		enableInterrupts = true;
 		cycleCount += 16;

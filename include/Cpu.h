@@ -62,7 +62,7 @@ namespace Gameboy
 		Register pc;
 		Register sp;
 
-		MMU mmu;
+		MMU* mmu; // pointer to mmu
 		ALU alu;
 
 		int cycleCount;
@@ -77,7 +77,7 @@ namespace Gameboy
 
 	#pragma region Methods
 	public:
-		CPU();
+		CPU(MMU* mmu);
 		~CPU();
 		int ExecuteOpcode();
 		void UpdateTimers();
@@ -87,6 +87,7 @@ namespace Gameboy
 		bool IsUpdateFinished();
 
 	private:
+		CPU();
 		u8 Load8BitImmediateValue();
 		u16 Load16BitImmediateValue();
 
