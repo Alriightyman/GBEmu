@@ -3109,71 +3109,518 @@ private void Daa()
 		Utility::SetFlags(af.Lo, CPUFlags::H, true);
 	} 
 
-	// BITbr b, A
+	// BITbr 0, A
 	void CPU::OpcodeCB_47()
 	{
-		BITbr(Load8BitImmediateValue(), af.Hi);
+		BITbr(0, af.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// BITbr b, B
+	// BITbr 0, B
 	void CPU::OpcodeCB_40()
 	{
-		BITbr(Load8BitImmediateValue(), bc.Hi);
+		BITbr(0, bc.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// BITbr b, C
+	// BITbr 0, C
 	void CPU::OpcodeCB_41()
 	{
-		BITbr(Load8BitImmediateValue(), bc.Lo);
+		BITbr(0, bc.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// BITbr b, D
+	// BITbr 0, D
 	void CPU::OpcodeCB_42()
 	{
-		BITbr(Load8BitImmediateValue(), de.Hi);
+		BITbr(0, de.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// BITbr b, E
+	// BITbr 0, E
 	void CPU::OpcodeCB_43()
 	{
-		BITbr(Load8BitImmediateValue(), de.Lo);
+		BITbr(0, de.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// BITbr b, H
+	// BITbr 0, H
 	void CPU::OpcodeCB_44()
 	{
-		BITbr(Load8BitImmediateValue(), hl.Hi);
+		BITbr(0, hl.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// BITbr b, L
+	// BITbr 0, L
 	void CPU::OpcodeCB_45()
 	{
-		BITbr(Load8BitImmediateValue(), hl.Lo);
+		BITbr(0, hl.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// BITbr b, (HL)
+	// BITbr 0, (HL)
 	void CPU::OpcodeCB_46()
 	{
 		u8 value = mmu.Read(hl.Value);
-		BITbr(Load8BitImmediateValue(), value);
+		BITbr(0, value);
 		pc += 2;
 		cycleCount += 16;
 	}
+	// BITbr 1, A
+	void CPU::OpcodeCB_4F()
+	{
+		BITbr(1, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
 
+	// BITbr 1, B
+	void CPU::OpcodeCB_48()
+	{
+		BITbr(1, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 1, C
+	void CPU::OpcodeCB_49()
+	{
+		BITbr(1, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 1, D
+	void CPU::OpcodeCB_4A()
+	{
+		BITbr(1, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 1, E
+	void CPU::OpcodeCB_4B()
+	{
+		BITbr(1, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 1, H
+	void CPU::OpcodeCB_4C()
+	{
+		BITbr(1, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 1, L
+	void CPU::OpcodeCB_4D()
+	{
+		BITbr(1, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 1, (HL)
+	void CPU::OpcodeCB_4E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(1, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// BITbr 2, A
+	void CPU::OpcodeCB_57()
+	{
+		BITbr(2, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 2, B
+	void CPU::OpcodeCB_50()
+	{
+		BITbr(2, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 2, C
+	void CPU::OpcodeCB_51()
+	{
+		BITbr(2, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 2, D
+	void CPU::OpcodeCB_52()
+	{
+		BITbr(2, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 2, E
+	void CPU::OpcodeCB_53()
+	{
+		BITbr(2, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 2, H
+	void CPU::OpcodeCB_54()
+	{
+		BITbr(2, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 2, L
+	void CPU::OpcodeCB_55()
+	{
+		BITbr(2, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 2, (HL)
+	void CPU::OpcodeCB_56()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(2, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// BITbr 3, A
+	void CPU::OpcodeCB_5F()
+	{
+		BITbr(3, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 3, B
+	void CPU::OpcodeCB_58()
+	{
+		BITbr(3, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 3, C
+	void CPU::OpcodeCB_59()
+	{
+		BITbr(3, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 3, D
+	void CPU::OpcodeCB_5A()
+	{
+		BITbr(3, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 3, E
+	void CPU::OpcodeCB_5B()
+	{
+		BITbr(3, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 3, H
+	void CPU::OpcodeCB_5C()
+	{
+		BITbr(3, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 3, L
+	void CPU::OpcodeCB_5D()
+	{
+		BITbr(3, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 3, (HL)
+	void CPU::OpcodeCB_5E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(3, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// BITbr 4, A
+	void CPU::OpcodeCB_67()
+	{
+		BITbr(4, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 4, B
+	void CPU::OpcodeCB_60()
+	{
+		BITbr(4, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 4, C
+	void CPU::OpcodeCB_61()
+	{
+		BITbr(4, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 4, D
+	void CPU::OpcodeCB_62()
+	{
+		BITbr(4, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 4, E
+	void CPU::OpcodeCB_63()
+	{
+		BITbr(4, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 4, H
+	void CPU::OpcodeCB_64()
+	{
+		BITbr(4, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 4, L
+	void CPU::OpcodeCB_65()
+	{
+		BITbr(4, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 4, (HL)
+	void CPU::OpcodeCB_66()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(4, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// BITbr 5, A
+	void CPU::OpcodeCB_6F()
+	{
+		BITbr(5, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 5, B
+	void CPU::OpcodeCB_68()
+	{
+		BITbr(5, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 5, C
+	void CPU::OpcodeCB_69()
+	{
+		BITbr(5, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 5, D
+	void CPU::OpcodeCB_6A()
+	{
+		BITbr(5, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 5, E
+	void CPU::OpcodeCB_6B()
+	{
+		BITbr(5, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 5, H
+	void CPU::OpcodeCB_6C()
+	{
+		BITbr(5, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 5, L
+	void CPU::OpcodeCB_6D()
+	{
+		BITbr(5, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 5, (HL)
+	void CPU::OpcodeCB_6E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(5, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// BITbr 6, A
+	void CPU::OpcodeCB_77()
+	{
+		BITbr(6, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 6, B
+	void CPU::OpcodeCB_70()
+	{
+		BITbr(6, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 6, C
+	void CPU::OpcodeCB_71()
+	{
+		BITbr(6, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 6, D
+	void CPU::OpcodeCB_72()
+	{
+		BITbr(6, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 6, E
+	void CPU::OpcodeCB_73()
+	{
+		BITbr(6, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 6, H
+	void CPU::OpcodeCB_74()
+	{
+		BITbr(6, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 6, L
+	void CPU::OpcodeCB_75()
+	{
+		BITbr(6, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 6, (HL)
+	void CPU::OpcodeCB_76()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(6, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// BITbr 7, A
+	void CPU::OpcodeCB_7F()
+	{
+		BITbr(7, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 7, B
+	void CPU::OpcodeCB_78()
+	{
+		BITbr(7, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 7, C
+	void CPU::OpcodeCB_79()
+	{
+		BITbr(7, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 7, D
+	void CPU::OpcodeCB_7A()
+	{
+		BITbr(7, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 7, E
+	void CPU::OpcodeCB_7B()
+	{
+		BITbr(7, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 7, H
+	void CPU::OpcodeCB_7C()
+	{
+		BITbr(7, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 7, L
+	void CPU::OpcodeCB_7D()
+	{
+		BITbr(7, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// BITbr 7, (HL)
+	void CPU::OpcodeCB_7E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		BITbr(7, value);
+		pc += 2;
+		cycleCount += 16;
+	}
 #pragma endregion
 #pragma region 2. SET b,r
 	/* Set bit u3 in register r8 to 1.
@@ -3183,76 +3630,522 @@ private void Daa()
 	*/
 	void CPU::SETbr(u8 bit, u8& r)
 	{
-		if (bit >= 0 || bit <= 7)
-		{
-			r = (1 << bit) | r;
-		}
+		r = (1 << bit) | r;
 	}
-	// SETbr b, A
+
+	// SETbr 0, A
 	void CPU::OpcodeCB_C7()
 	{
-		SETbr(Load8BitImmediateValue(), af.Hi);
+		SETbr(0, af.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// SETbr b, B
+	// SETbr 0, B
 	void CPU::OpcodeCB_C0()
 	{
-		SETbr(Load8BitImmediateValue(), bc.Hi);
+		SETbr(0, bc.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// SETbr b, C
+	// SETbr 0, C
 	void CPU::OpcodeCB_C1()
 	{
-		SETbr(Load8BitImmediateValue(), bc.Lo);
+		SETbr(0, bc.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// SETbr b, D
+	// SETbr 0, D
 	void CPU::OpcodeCB_C2()
 	{
-		SETbr(Load8BitImmediateValue(), de.Hi);
+		SETbr(0, de.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// SETbr b, E
+	// SETbr 0, E
 	void CPU::OpcodeCB_C3()
 	{
-		SETbr(Load8BitImmediateValue(), de.Lo);
+		SETbr(0, de.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// SETbr b, H
+	// SETbr 0, H
 	void CPU::OpcodeCB_C4()
 	{
-		SETbr(Load8BitImmediateValue(), hl.Hi);
+		SETbr(0, hl.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// SETbr b, L
+	// SETbr 0, L
 	void CPU::OpcodeCB_C5()
 	{
-		SETbr(Load8BitImmediateValue(), hl.Lo);
+		SETbr(0, hl.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// SETbr b, (HL)
+	// SETbr 0, (HL)
 	void CPU::OpcodeCB_C6()
 	{
 		u8 value = mmu.Read(hl.Value);
-		SETbr(Load8BitImmediateValue(), value);
-		mmu.Write(hl.Value, value);
+		SETbr(0, value);
 		pc += 2;
 		cycleCount += 16;
 	}
+	// SETbr 1, A
+	void CPU::OpcodeCB_CF()
+	{
+		SETbr(1, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 1, B
+	void CPU::OpcodeCB_C8()
+	{
+		SETbr(1, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 1, C
+	void CPU::OpcodeCB_C9()
+	{
+		SETbr(1, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 1, D
+	void CPU::OpcodeCB_CA()
+	{
+		SETbr(1, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 1, E
+	void CPU::OpcodeCB_CB()
+	{
+		SETbr(1, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 1, H
+	void CPU::OpcodeCB_CC()
+	{
+		SETbr(1, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 1, L
+	void CPU::OpcodeCB_CD()
+	{
+		SETbr(1, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 1, (HL)
+	void CPU::OpcodeCB_CE()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(1, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// SETbr 2, A
+	void CPU::OpcodeCB_D7()
+	{
+		SETbr(2, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 2, B
+	void CPU::OpcodeCB_D0()
+	{
+		SETbr(2, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 2, C
+	void CPU::OpcodeCB_D1()
+	{
+		SETbr(2, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 2, D
+	void CPU::OpcodeCB_D2()
+	{
+		SETbr(2, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 2, E
+	void CPU::OpcodeCB_D3()
+	{
+		SETbr(2, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 2, H
+	void CPU::OpcodeCB_D4()
+	{
+		SETbr(2, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 2, L
+	void CPU::OpcodeCB_D5()
+	{
+		SETbr(2, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 2, (HL)
+	void CPU::OpcodeCB_D6()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(2, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// SETbr 3, A
+	void CPU::OpcodeCB_DF()
+	{
+		SETbr(3, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 3, B
+	void CPU::OpcodeCB_D8()
+	{
+		SETbr(3, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 3, C
+	void CPU::OpcodeCB_D9()
+	{
+		SETbr(3, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 3, D
+	void CPU::OpcodeCB_DA()
+	{
+		SETbr(3, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 3, E
+	void CPU::OpcodeCB_DB()
+	{
+		SETbr(3, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 3, H
+	void CPU::OpcodeCB_DC()
+	{
+		SETbr(3, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 3, L
+	void CPU::OpcodeCB_DD()
+	{
+		SETbr(3, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 3, (HL)
+	void CPU::OpcodeCB_DE()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(3, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// SETbr 4, A
+	void CPU::OpcodeCB_E7()
+	{
+		SETbr(4, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 4, B
+	void CPU::OpcodeCB_E0()
+	{
+		SETbr(4, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 4, C
+	void CPU::OpcodeCB_E1()
+	{
+		SETbr(4, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 4, D
+	void CPU::OpcodeCB_E2()
+	{
+		SETbr(4, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 4, E
+	void CPU::OpcodeCB_E3()
+	{
+		SETbr(4, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 4, H
+	void CPU::OpcodeCB_E4()
+	{
+		SETbr(4, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 4, L
+	void CPU::OpcodeCB_E5()
+	{
+		SETbr(4, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 4, (HL)
+	void CPU::OpcodeCB_E6()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(4, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// SETbr 5, A
+	void CPU::OpcodeCB_EF()
+	{
+		SETbr(5, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 5, B
+	void CPU::OpcodeCB_E8()
+	{
+		SETbr(5, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 5, C
+	void CPU::OpcodeCB_E9()
+	{
+		SETbr(5, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 5, D
+	void CPU::OpcodeCB_EA()
+	{
+		SETbr(5, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 5, E
+	void CPU::OpcodeCB_EB()
+	{
+		SETbr(5, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 5, H
+	void CPU::OpcodeCB_EC()
+	{
+		SETbr(5, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 5, L
+	void CPU::OpcodeCB_ED()
+	{
+		SETbr(5, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 5, (HL)
+	void CPU::OpcodeCB_EE()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(5, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// SETbr 6, A
+	void CPU::OpcodeCB_F7()
+	{
+		SETbr(6, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 6, B
+	void CPU::OpcodeCB_F0()
+	{
+		SETbr(6, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 6, C
+	void CPU::OpcodeCB_F1()
+	{
+		SETbr(6, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 6, D
+	void CPU::OpcodeCB_F2()
+	{
+		SETbr(6, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 6, E
+	void CPU::OpcodeCB_F3()
+	{
+		SETbr(6, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 6, H
+	void CPU::OpcodeCB_F4()
+	{
+		SETbr(6, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 6, L
+	void CPU::OpcodeCB_F5()
+	{
+		SETbr(6, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 6, (HL)
+	void CPU::OpcodeCB_F6()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(6, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// SETbr 7, A
+	void CPU::OpcodeCB_FF()
+	{
+		SETbr(7, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 7, B
+	void CPU::OpcodeCB_F8()
+	{
+		SETbr(7, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 7, C
+	void CPU::OpcodeCB_F9()
+	{
+		SETbr(7, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 7, D
+	void CPU::OpcodeCB_FA()
+	{
+		SETbr(7, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 7, E
+	void CPU::OpcodeCB_FB()
+	{
+		SETbr(7, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 7, H
+	void CPU::OpcodeCB_FC()
+	{
+		SETbr(7, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 7, L
+	void CPU::OpcodeCB_FD()
+	{
+		SETbr(7, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// SETbr 7, (HL)
+	void CPU::OpcodeCB_FE()
+	{
+		u8 value = mmu.Read(hl.Value);
+		SETbr(7, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+
 
 #pragma endregion
 
@@ -3264,77 +4157,523 @@ private void Daa()
 	*/
 	void CPU::RESbr(u8 bit, u8& r)
 	{
-		if (bit >= 0 || bit <= 7)
-		{
-			r = (0 << bit) | r;
-		}
+		r = (0 << bit) | r;
 	}
 
-	// RESbr b, A
+
+	// RESbr 0, A
 	void CPU::OpcodeCB_87()
 	{
-		RESbr(Load8BitImmediateValue(), af.Hi);
+		RESbr(0, af.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// RESbr b, B
+	// RESbr 0, B
 	void CPU::OpcodeCB_80()
 	{
-		RESbr(Load8BitImmediateValue(), bc.Hi);
+		RESbr(0, bc.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// RESbr b, C
+	// RESbr 0, C
 	void CPU::OpcodeCB_81()
 	{
-		RESbr(Load8BitImmediateValue(), bc.Lo);
+		RESbr(0, bc.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// RESbr b, D
+	// RESbr 0, D
 	void CPU::OpcodeCB_82()
 	{
-		RESbr(Load8BitImmediateValue(), de.Hi);
+		RESbr(0, de.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// RESbr b, E
+	// RESbr 0, E
 	void CPU::OpcodeCB_83()
 	{
-		RESbr(Load8BitImmediateValue(), de.Lo);
+		RESbr(0, de.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// RESbr b, H
+	// RESbr 0, H
 	void CPU::OpcodeCB_84()
 	{
-		RESbr(Load8BitImmediateValue(), hl.Hi);
+		RESbr(0, hl.Hi);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// RESbr b, L
+	// RESbr 0, L
 	void CPU::OpcodeCB_85()
 	{
-		RESbr(Load8BitImmediateValue(), hl.Lo);
+		RESbr(0, hl.Lo);
 		pc += 2;
 		cycleCount += 8;
 	}
 
-	// RESbr b, (HL)
+	// RESbr 0, (HL)
 	void CPU::OpcodeCB_86()
 	{
 		u8 value = mmu.Read(hl.Value);
-		RESbr(Load8BitImmediateValue(), value);
-		mmu.Write(hl.Value, value);
+		RESbr(0, value);
 		pc += 2;
 		cycleCount += 16;
 	}
+	// RESbr 1, A
+	void CPU::OpcodeCB_8F()
+	{
+		RESbr(1, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 1, B
+	void CPU::OpcodeCB_88()
+	{
+		RESbr(1, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 1, C
+	void CPU::OpcodeCB_89()
+	{
+		RESbr(1, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 1, D
+	void CPU::OpcodeCB_8A()
+	{
+		RESbr(1, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 1, E
+	void CPU::OpcodeCB_8B()
+	{
+		RESbr(1, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 1, H
+	void CPU::OpcodeCB_8C()
+	{
+		RESbr(1, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 1, L
+	void CPU::OpcodeCB_8D()
+	{
+		RESbr(1, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 1, (HL)
+	void CPU::OpcodeCB_8E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(1, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// RESbr 2, A
+	void CPU::OpcodeCB_97()
+	{
+		RESbr(2, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 2, B
+	void CPU::OpcodeCB_90()
+	{
+		RESbr(2, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 2, C
+	void CPU::OpcodeCB_91()
+	{
+		RESbr(2, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 2, D
+	void CPU::OpcodeCB_92()
+	{
+		RESbr(2, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 2, E
+	void CPU::OpcodeCB_93()
+	{
+		RESbr(2, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 2, H
+	void CPU::OpcodeCB_94()
+	{
+		RESbr(2, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 2, L
+	void CPU::OpcodeCB_95()
+	{
+		RESbr(2, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 2, (HL)
+	void CPU::OpcodeCB_96()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(2, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// RESbr 3, A
+	void CPU::OpcodeCB_9F()
+	{
+		RESbr(3, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 3, B
+	void CPU::OpcodeCB_98()
+	{
+		RESbr(3, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 3, C
+	void CPU::OpcodeCB_99()
+	{
+		RESbr(3, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 3, D
+	void CPU::OpcodeCB_9A()
+	{
+		RESbr(3, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 3, E
+	void CPU::OpcodeCB_9B()
+	{
+		RESbr(3, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 3, H
+	void CPU::OpcodeCB_9C()
+	{
+		RESbr(3, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 3, L
+	void CPU::OpcodeCB_9D()
+	{
+		RESbr(3, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 3, (HL)
+	void CPU::OpcodeCB_9E()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(3, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// RESbr 4, A
+	void CPU::OpcodeCB_A7()
+	{
+		RESbr(4, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 4, B
+	void CPU::OpcodeCB_A0()
+	{
+		RESbr(4, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 4, C
+	void CPU::OpcodeCB_A1()
+	{
+		RESbr(4, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 4, D
+	void CPU::OpcodeCB_A2()
+	{
+		RESbr(4, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 4, E
+	void CPU::OpcodeCB_A3()
+	{
+		RESbr(4, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 4, H
+	void CPU::OpcodeCB_A4()
+	{
+		RESbr(4, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 4, L
+	void CPU::OpcodeCB_A5()
+	{
+		RESbr(4, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 4, (HL)
+	void CPU::OpcodeCB_A6()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(4, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// RESbr 5, A
+	void CPU::OpcodeCB_AF()
+	{
+		RESbr(5, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 5, B
+	void CPU::OpcodeCB_A8()
+	{
+		RESbr(5, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 5, C
+	void CPU::OpcodeCB_A9()
+	{
+		RESbr(5, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 5, D
+	void CPU::OpcodeCB_AA()
+	{
+		RESbr(5, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 5, E
+	void CPU::OpcodeCB_AB()
+	{
+		RESbr(5, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 5, H
+	void CPU::OpcodeCB_AC()
+	{
+		RESbr(5, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 5, L
+	void CPU::OpcodeCB_AD()
+	{
+		RESbr(5, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 5, (HL)
+	void CPU::OpcodeCB_AE()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(5, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// RESbr 6, A
+	void CPU::OpcodeCB_B7()
+	{
+		RESbr(6, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 6, B
+	void CPU::OpcodeCB_B0()
+	{
+		RESbr(6, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 6, C
+	void CPU::OpcodeCB_B1()
+	{
+		RESbr(6, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 6, D
+	void CPU::OpcodeCB_B2()
+	{
+		RESbr(6, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 6, E
+	void CPU::OpcodeCB_B3()
+	{
+		RESbr(6, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 6, H
+	void CPU::OpcodeCB_B4()
+	{
+		RESbr(6, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 6, L
+	void CPU::OpcodeCB_B5()
+	{
+		RESbr(6, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 6, (HL)
+	void CPU::OpcodeCB_B6()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(6, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+	// RESbr 7, A
+	void CPU::OpcodeCB_BF()
+	{
+		RESbr(7, af.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 7, B
+	void CPU::OpcodeCB_B8()
+	{
+		RESbr(7, bc.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 7, C
+	void CPU::OpcodeCB_B9()
+	{
+		RESbr(7, bc.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 7, D
+	void CPU::OpcodeCB_BA()
+	{
+		RESbr(7, de.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 7, E
+	void CPU::OpcodeCB_BB()
+	{
+		RESbr(7, de.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 7, H
+	void CPU::OpcodeCB_BC()
+	{
+		RESbr(7, hl.Hi);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 7, L
+	void CPU::OpcodeCB_BD()
+	{
+		RESbr(7, hl.Lo);
+		pc += 2;
+		cycleCount += 8;
+	}
+
+	// RESbr 7, (HL)
+	void CPU::OpcodeCB_BE()
+	{
+		u8 value = mmu.Read(hl.Value);
+		RESbr(7, value);
+		pc += 2;
+		cycleCount += 16;
+	}
+
 #pragma endregion
 
 #pragma endregion
@@ -3395,6 +4734,7 @@ private void Daa()
 			cycleCount += 12;
 		}
 	}
+
 	// JP NC, nn
 	void CPU::OpcodeD2()
 	{
@@ -3744,6 +5084,53 @@ private void Daa()
 #pragma endregion
 
 
+#pragma endregion
+
+#pragma region Not Existant Opcodes
+	void CPU::OpcodeD3()
+	{
+
+	}
+	void CPU::OpcodeDB()
+	{
+
+	}
+	void CPU::OpcodeDD()
+	{
+
+	}
+	void CPU::OpcodeE3()
+	{
+
+	}
+	void CPU::OpcodeE4()
+	{
+
+	}
+	void CPU::OpcodeEB()
+	{
+
+	}
+	void CPU::OpcodeEC()
+	{
+
+	}
+	void CPU::OpcodeED()
+	{
+
+	}
+	void CPU::OpcodeF4()
+	{
+
+	}
+	void CPU::OpcodeFC()
+	{
+
+	}
+	void CPU::OpcodeFD()
+	{
+
+	}
 #pragma endregion
 
 }
