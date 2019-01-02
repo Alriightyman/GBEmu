@@ -3338,6 +3338,7 @@ private void Daa()
 #pragma endregion
 
 #pragma endregion
+
 #pragma region Jumps
 
 #pragma region 1. JP nn
@@ -3592,4 +3593,157 @@ private void Daa()
 #pragma endregion
 
 #pragma endregion
+
+#pragma region Restarts
+
+#pragma region 1. RST n
+	/* Push present address onto stack.
+		Jump to address $0000 + n.
+		Use with :
+			n = $00, $08, $10, $18, $20, $28, $30, $38
+	*/
+	// RST 00H
+	void CPU::OpcodeC7()
+	{
+		pc = 0x0000 + 0x00;
+		cycleCount += 16;
+	}
+	// RST 08H
+	void CPU::OpcodeCF()
+	{
+		pc = 0x0000 + 0x08;
+		cycleCount += 16;
+	}
+	// RST 10H
+	void CPU::OpcodeD7()
+	{
+		pc = 0x0000 + 0x10;
+		cycleCount += 16;
+	}
+	// RST 18H
+	void CPU::OpcodeDF()
+	{
+		pc = 0x0000 + 0x18;
+		cycleCount += 16;
+	}
+	// RST 20H
+	void CPU::OpcodeE7()
+	{
+		pc = 0x0000 + 0x20;
+		cycleCount += 16;
+	}
+	// RST 28H
+	void CPU::OpcodeEF()
+	{
+		pc = 0x0000 + 0x28;
+		cycleCount += 16;
+	}
+	// RST 30H
+	void CPU::OpcodeF7()
+	{
+		pc = 0x0000 + 0x30;
+		cycleCount += 16;
+	}
+	// RST 38H
+	void CPU::OpcodeFF()
+	{
+		pc = 0x0000 + 0x38;
+		cycleCount += 16;
+	}
+#pragma endregion
+
+#pragma endregion
+
+#pragma region Returns
+
+#pragma region 1. RET	// Pop two bytes from stack & jump to that address.	
+	void CPU::OpcodeC9()
+	{
+		u8 address = mmu.Pop(sp);
+		pc = address;
+		cycleCount += 16;
+	}
+#pragma endregion
+
+#pragma region 2. RET cc	/*Return if following condition is true:
+	Use with:
+	cc = NZ, Return if Z flag is reset.
+	cc = Z, Return if Z flag is set.
+	cc = NC, Return if C flag is reset.
+	cc = C, Return if C flag is set.
+	*/
+	// RET NZ
+	void CPU::OpcodeC0()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			u8 address = mmu.Pop(sp);
+			pc = address;
+			cycleCount += 20;
+		}
+		else
+		{
+			pc++;
+			cycleCount += 8;
+		}
+	}
+	// RET Z
+	void CPU::OpcodeC8()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::Z))
+		{
+			u8 address = mmu.Pop(sp);
+			pc = address;
+			cycleCount += 20;
+		}
+		else
+		{
+			pc++;
+			cycleCount += 8;
+		}
+	}// RET NC
+	void CPU::OpcodeD0()
+	{
+		if (!Utility::IsFlagSet(af.Lo, CPUFlags::N))
+		{
+			u8 address = mmu.Pop(sp);
+			pc = address;
+			cycleCount += 20;
+		}
+		else
+		{
+			pc++;
+			cycleCount += 8;
+		}
+	}// RET C
+	void CPU::OpcodeD8()
+	{
+		if (Utility::IsFlagSet(af.Lo, CPUFlags::C))
+		{
+			u8 address = mmu.Pop(sp);
+			pc = address;
+			cycleCount += 20;
+		}
+		else
+		{
+			pc++;
+			cycleCount += 8;
+		}
+	}
+#pragma endregion
+
+#pragma region 3. RETI
+	// Pop two bytes from stack & jump to that address then enable interrupts.
+	void CPU::OpcodeD9()
+	{
+		u8 address = mmu.Pop(sp);
+		pc = address;
+		enableInterrupts = true;
+		cycleCount += 16;
+	}
+#pragma endregion
+
+
+#pragma endregion
+
 }
