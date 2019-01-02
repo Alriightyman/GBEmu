@@ -1,5 +1,6 @@
 #include "CPU.h"
 #include "Utility.h"
+#include <sstream>
 
 namespace Gameboy
 {
@@ -18,11 +19,27 @@ namespace Gameboy
 	{
 	}
 
-	void CPU::Execute()
+	std::string CPU::PrintRegisters()
 	{
+		std::stringstream stringStream;
 
-		ExecuteNextOpcode();
+		stringStream << "Registers: " << "A: " << af.Hi
+			<< "F: " << std::hex << af.Lo
+			<< "B: " << std::hex << bc.Hi
+			<< "C: " << std::hex << bc.Lo
+			<< "D: " << std::hex << de.Hi
+			<< "E: " << std::hex << de.Lo
+			<< "H: " << std::hex << hl.Hi
+			<< "L: " << std::hex << hl.Lo
+			<< "SP: " << std::hex << sp.Value
+			<< "PC: " << std::hex << pc.Value << std::endl;
 
+		return stringStream.str();
+	}
+
+	bool CPU::IsUpdateFinished()
+	{
+		return cycleCount > MAXCYCLES;
 	}
 
 	u8 CPU::Load8BitImmediateValue()
@@ -38,15 +55,16 @@ namespace Gameboy
 		return (hi << 8) | lo;
 	}
 
-	void CPU::ExecuteNextOpcode()
+	int CPU::ExecuteOpcode()
 	{
+		u8 opcode = mmu.Read(pc.Value);
+		OpcodeFunction opcodeMethod = Opcodes[opcode];
+		(this->*opcodeMethod)();
+
+		return cycleCount;
 	}
 
 	void CPU::UpdateTimers()
-	{
-	}
-
-	void CPU::UpdateGraphics()
 	{
 	}
 
@@ -5165,4 +5183,10 @@ private void Daa()
 	}
 #pragma endregion
 
+	void CPU::OpcodeCB()
+	{
+		u8 opcode = Load8BitImmediateValue();
+		OpcodeFunction opcodeMethod = OpcodeCBs[opcode];
+		(this->*opcodeMethod)();
+	}
 }

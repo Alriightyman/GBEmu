@@ -22,6 +22,8 @@ build/
 Roms/
 GBEmu/
 
+# Dlls
+SDL2.dll
 
 # MSTest test Results
 [Tt]est[Rr]esult*/

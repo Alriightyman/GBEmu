@@ -27,10 +27,19 @@ bool Utility::IsFullCarry(u8 x, u8 y)
 	return result;
 }
 
+bool Utility::IsHalfCarry16(u16 x, u16 y)
+{
+	bool result = false;
+	result = ((x & 0x0FF) + (y & 0x0FF) & 0x100) != 0x0;
+	return false;
+}
+
 bool Utility::IsFullCarry16(u16 x, u16 y)
 {
 	bool result = false;
-	//result = 
+
+	result = ((x & 0xFFF) + (y & 0xFFF) & 0x1000) != 0x0;
+
 	return result;
 }
 

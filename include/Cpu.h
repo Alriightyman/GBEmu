@@ -2,6 +2,7 @@
 #include "Register.h"
 #include "ALU.h"
 #include "MMU.h"
+#include <string>
 
 namespace Gameboy
 {
@@ -69,6 +70,7 @@ namespace Gameboy
 		bool stop;
 		bool disableInterrupts;
 		bool enableInterrupts;
+	public:
 		const int MAXCYCLES = 69905;
 
 #pragma endregion
@@ -77,15 +79,17 @@ namespace Gameboy
 	public:
 		CPU();
 		~CPU();
-		void Execute();
+		int ExecuteOpcode();
+		void UpdateTimers();
+		void RunInterrupts();
+		std::string PrintRegisters();
+
+		bool IsUpdateFinished();
 
 	private:
 		u8 Load8BitImmediateValue();
 		u16 Load16BitImmediateValue();
-		void ExecuteNextOpcode();
-		void UpdateTimers();
-		void UpdateGraphics();
-		void RunInterrupts();
+
 	
 		#pragma region Opcodes
 		void Opcode00();

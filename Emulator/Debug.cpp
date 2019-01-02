@@ -4,6 +4,11 @@
 using namespace std;
 
 
+void Debug::Print(Gameboy::CPU cpu)
+{
+	std::cout << cpu.PrintRegisters();
+}
+
 void Debug::ClearScreen()
 {
 #ifdef _DEBUG
