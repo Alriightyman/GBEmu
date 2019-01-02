@@ -18,6 +18,13 @@ namespace Gameboy
 	{
 	}
 
+	void CPU::Execute()
+	{
+
+		ExecuteNextOpcode();
+
+	}
+
 	u8 CPU::Load8BitImmediateValue()
 	{
 		return mmu.Read(pc + 1);
@@ -29,6 +36,22 @@ namespace Gameboy
 		u8 hi = mmu.Read(pc + 2);
 
 		return (hi << 8) | lo;
+	}
+
+	void CPU::ExecuteNextOpcode()
+	{
+	}
+
+	void CPU::UpdateTimers()
+	{
+	}
+
+	void CPU::UpdateGraphics()
+	{
+	}
+
+	void CPU::RunInterrupts()
+	{
 	}
 
 #pragma region 8-Bit Loads
@@ -3084,9 +3107,11 @@ private void Daa()
 		cycleCount += 16;
 	}
 #pragma endregion
-#pragma endregion
+#pragma endregion
+
 #pragma region Bit Opcodes
-#pragma region 1. BIT b,r	/*
+#pragma region 1. BIT b,r
+	/*
 	BIT u3,r8
 		Test bit u3 in register r8, set the zero flag if bit not set.
 		Cycles: 2
@@ -4696,7 +4721,8 @@ private void Daa()
 	}
 #pragma endregion
 
-#pragma region 2. JP cc,nn	/*Jump to address n if following condition is true:
+#pragma region 2. JP cc,nn
+	/*Jump to address n if following condition is true:
 		 cc = NZ, Jump if Z flag is reset.
 		 cc = Z, Jump if Z flag is set.
 		 cc = NC, Jump if C flag is reset.
@@ -4770,7 +4796,8 @@ private void Daa()
 
 #pragma endregion
 
-#pragma region 3. JP (HL)	// Jump to address contained in HL
+#pragma region 3. JP (HL)
+	// Jump to address contained in HL
 	void CPU::OpcodeE9()
 	{
 		pc = hl.Value;
@@ -4794,7 +4821,8 @@ private void Daa()
 		 cc = NZ, Jump if Z flag is reset.
 		 cc = Z, Jump if Z flag is set.
 		 cc = NC, Jump if C flag is reset.
-		 cc = C, Jump if C flag is set.	*/
+		 cc = C, Jump if C flag is set.
+	*/
 	// JR NZ,n
 	void CPU::Opcode20()
 	{
@@ -4857,7 +4885,8 @@ private void Daa()
 
 #pragma region  Calls
 
-#pragma region 1. CALL nn	/*Push address of next instruction onto stack and then
+#pragma region 1. CALL nn
+	/*Push address of next instruction onto stack and then
 	  jump to address nn.*/
 	void CPU::OpcodeCD()
 	{
@@ -4996,7 +5025,9 @@ private void Daa()
 
 #pragma region Returns
 
-#pragma region 1. RET	// Pop two bytes from stack & jump to that address.	
+#pragma region 1. RET
+
+	// Pop two bytes from stack & jump to that address.	
 	void CPU::OpcodeC9()
 	{
 		u8 address = mmu.Pop(sp);
@@ -5005,7 +5036,8 @@ private void Daa()
 	}
 #pragma endregion
 
-#pragma region 2. RET cc	/*Return if following condition is true:
+#pragma region 2. RET cc
+	/*Return if following condition is true:
 	Use with:
 	cc = NZ, Return if Z flag is reset.
 	cc = Z, Return if Z flag is set.

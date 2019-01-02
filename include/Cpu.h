@@ -1,539 +1,626 @@
 #pragma once
-#include "Memory.h"
+#include "Register.h"
+#include "ALU.h"
+#include "MMU.h"
 
-// emulates the gameboy cpu.  Similar to a Z80 and 8080 processor
-// See http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf for details
-
-/*				GB CPU Speed	NOP Instruction
-Machine Cycles		1.05MHz			1 cycle
-Clock Cycles		4.19MHz			4 cycles
-_____________________________________________________________________
-
-  Registers
- -----------
-|15..8 7...0|
-|-----------|
-|  A  |  F  |
-|-----------|
-|  B  |  C  |
-|-----------|
-|  D  |  E  |
-|-----------|
-|  H  |  L  |
-|-----------|
-|     SP    |
-|-----------|
-|     PC    |
- -----------
- 
- Flag Registers
-/---------------\
-|7|6|5|4|3|2|1|0|
-|---------------|
-|Z|N|H|C|0|0|0|0|
-\---------------/
-Zero Flag (Z):
-	This bit is set when the result of a math operation
-	is zero or two values match when using the CP
-	instruction.
-Subtract Flag (N):
-	This bit is set if a subtraction was performed in the
-	last math instruction.
-Half Carry Flag (H):
-	This bit is set if a carry occurred from the lower
-	nibble in the last math operation.
-Carry Flag (C):
-	This bit is set if a carry occurred from the last
-	math operation or if register A is the smaller value
-	when executing the CP instruction.
-
-*/
-//// forward declaration
-//class Memory;
-//typedef char byte;
-typedef unsigned int uint;
-typedef unsigned short ushort;
-
-// Flag bits
-#define ZFlag 7
-#define NFlag 6
-#define HFlag 5
-#define CFlag 4
-
-
-class Cpu
+namespace Gameboy
 {
-private:
-/*	struct Flags 
+	class CPU
 	{
-		byte z:1;
-		byte n:1;
-		byte h:1;
-		byte c:1;
-		byte unused:4;
-	};
-*/
-	typedef uint(Cpu::*opcode_func)(Memory&);
-private:
 
-#pragma region Member Variables
-
-	struct Registers
-	{
-		union
+	#pragma region Opcode function tables
+		typedef void(CPU::*OpcodeFunction)();
+		const OpcodeFunction Opcodes[256] =
 		{
-			struct
-			{
-				byte F;
-				byte A;
-			};
-			ushort AF;
+			&CPU::Opcode00,&CPU::Opcode01,&CPU::Opcode02,&CPU::Opcode03,&CPU::Opcode04,&CPU::Opcode05,&CPU::Opcode06,&CPU::Opcode07,&CPU::Opcode08,&CPU::Opcode09,&CPU::Opcode0A,&CPU::Opcode0B,&CPU::Opcode0C,&CPU::Opcode0D,&CPU::Opcode0E,&CPU::Opcode0F,
+			&CPU::Opcode10,&CPU::Opcode11,&CPU::Opcode12,&CPU::Opcode13,&CPU::Opcode14,&CPU::Opcode15,&CPU::Opcode16,&CPU::Opcode17,&CPU::Opcode18,&CPU::Opcode19,&CPU::Opcode1A,&CPU::Opcode1B,&CPU::Opcode1C,&CPU::Opcode1D,&CPU::Opcode1E,&CPU::Opcode1F,
+			&CPU::Opcode20,&CPU::Opcode21,&CPU::Opcode22,&CPU::Opcode23,&CPU::Opcode24,&CPU::Opcode25,&CPU::Opcode26,&CPU::Opcode27,&CPU::Opcode28,&CPU::Opcode29,&CPU::Opcode2A,&CPU::Opcode2B,&CPU::Opcode2C,&CPU::Opcode2D,&CPU::Opcode2E,&CPU::Opcode2F,
+			&CPU::Opcode30,&CPU::Opcode31,&CPU::Opcode32,&CPU::Opcode33,&CPU::Opcode34,&CPU::Opcode35,&CPU::Opcode36,&CPU::Opcode37,&CPU::Opcode38,&CPU::Opcode39,&CPU::Opcode3A,&CPU::Opcode3B,&CPU::Opcode3C,&CPU::Opcode3D,&CPU::Opcode3E,&CPU::Opcode3F,
+			&CPU::Opcode40,&CPU::Opcode41,&CPU::Opcode42,&CPU::Opcode43,&CPU::Opcode44,&CPU::Opcode45,&CPU::Opcode46,&CPU::Opcode47,&CPU::Opcode48,&CPU::Opcode49,&CPU::Opcode4A,&CPU::Opcode4B,&CPU::Opcode4C,&CPU::Opcode4D,&CPU::Opcode4E,&CPU::Opcode4F,
+			&CPU::Opcode50,&CPU::Opcode51,&CPU::Opcode52,&CPU::Opcode53,&CPU::Opcode54,&CPU::Opcode55,&CPU::Opcode56,&CPU::Opcode57,&CPU::Opcode58,&CPU::Opcode59,&CPU::Opcode5A,&CPU::Opcode5B,&CPU::Opcode5C,&CPU::Opcode5D,&CPU::Opcode5E,&CPU::Opcode5F,
+			&CPU::Opcode60,&CPU::Opcode61,&CPU::Opcode62,&CPU::Opcode63,&CPU::Opcode64,&CPU::Opcode65,&CPU::Opcode66,&CPU::Opcode67,&CPU::Opcode68,&CPU::Opcode69,&CPU::Opcode6A,&CPU::Opcode6B,&CPU::Opcode6C,&CPU::Opcode6D,&CPU::Opcode6E,&CPU::Opcode6F,
+			&CPU::Opcode70,&CPU::Opcode71,&CPU::Opcode72,&CPU::Opcode73,&CPU::Opcode74,&CPU::Opcode75,&CPU::Opcode76,&CPU::Opcode77,&CPU::Opcode78,&CPU::Opcode79,&CPU::Opcode7A,&CPU::Opcode7B,&CPU::Opcode7C,&CPU::Opcode7D,&CPU::Opcode7E,&CPU::Opcode7F,
+			&CPU::Opcode80,&CPU::Opcode81,&CPU::Opcode82,&CPU::Opcode83,&CPU::Opcode84,&CPU::Opcode85,&CPU::Opcode86,&CPU::Opcode87,&CPU::Opcode88,&CPU::Opcode89,&CPU::Opcode8A,&CPU::Opcode8B,&CPU::Opcode8C,&CPU::Opcode8D,&CPU::Opcode8E,&CPU::Opcode8F,
+			&CPU::Opcode90,&CPU::Opcode91,&CPU::Opcode92,&CPU::Opcode93,&CPU::Opcode94,&CPU::Opcode95,&CPU::Opcode96,&CPU::Opcode97,&CPU::Opcode98,&CPU::Opcode99,&CPU::Opcode9A,&CPU::Opcode9B,&CPU::Opcode9C,&CPU::Opcode9D,&CPU::Opcode9E,&CPU::Opcode9F,
+			&CPU::OpcodeA0,&CPU::OpcodeA1,&CPU::OpcodeA2,&CPU::OpcodeA3,&CPU::OpcodeA4,&CPU::OpcodeA5,&CPU::OpcodeA6,&CPU::OpcodeA7,&CPU::OpcodeA8,&CPU::OpcodeA9,&CPU::OpcodeAA,&CPU::OpcodeAB,&CPU::OpcodeAC,&CPU::OpcodeAD,&CPU::OpcodeAE,&CPU::OpcodeAF,
+			&CPU::OpcodeB0,&CPU::OpcodeB1,&CPU::OpcodeB2,&CPU::OpcodeB3,&CPU::OpcodeB4,&CPU::OpcodeB5,&CPU::OpcodeB6,&CPU::OpcodeB7,&CPU::OpcodeB8,&CPU::OpcodeB9,&CPU::OpcodeBA,&CPU::OpcodeBB,&CPU::OpcodeBC,&CPU::OpcodeBD,&CPU::OpcodeBE,&CPU::OpcodeBF,
+			&CPU::OpcodeC0,&CPU::OpcodeC1,&CPU::OpcodeC2,&CPU::OpcodeC3,&CPU::OpcodeC4,&CPU::OpcodeC5,&CPU::OpcodeC6,&CPU::OpcodeC7,&CPU::OpcodeC8,&CPU::OpcodeC9,&CPU::OpcodeCA,&CPU::OpcodeCB,&CPU::OpcodeCC,&CPU::OpcodeCD,&CPU::OpcodeCE,&CPU::OpcodeCF,
+			&CPU::OpcodeD0,&CPU::OpcodeD1,&CPU::OpcodeD2,&CPU::OpcodeD3,&CPU::OpcodeD4,&CPU::OpcodeD5,&CPU::OpcodeD6,&CPU::OpcodeD7,&CPU::OpcodeD8,&CPU::OpcodeD9,&CPU::OpcodeDA,&CPU::OpcodeDB,&CPU::OpcodeDC,&CPU::OpcodeDD,&CPU::OpcodeDE,&CPU::OpcodeDF,
+			&CPU::OpcodeE0,&CPU::OpcodeE1,&CPU::OpcodeE2,&CPU::OpcodeE3,&CPU::OpcodeE4,&CPU::OpcodeE5,&CPU::OpcodeE6,&CPU::OpcodeE7,&CPU::OpcodeE8,&CPU::OpcodeE9,&CPU::OpcodeEA,&CPU::OpcodeEB,&CPU::OpcodeEC,&CPU::OpcodeED,&CPU::OpcodeEE,&CPU::OpcodeEF,
+			&CPU::OpcodeF0,&CPU::OpcodeF1,&CPU::OpcodeF2,&CPU::OpcodeF3,&CPU::OpcodeF4,&CPU::OpcodeF5,&CPU::OpcodeF6,&CPU::OpcodeF7,&CPU::OpcodeF8,&CPU::OpcodeF9,&CPU::OpcodeFA,&CPU::OpcodeFB,&CPU::OpcodeFC,&CPU::OpcodeFD,&CPU::OpcodeFE,&CPU::OpcodeFF
 		};
 
-		union
+		const OpcodeFunction OpcodeCBs[256] =
 		{
-			struct
-			{
-				byte C;
-				byte B;
-			};
-			ushort BC;
+			&CPU::OpcodeCB_00,&CPU::OpcodeCB_01,&CPU::OpcodeCB_02,&CPU::OpcodeCB_03,&CPU::OpcodeCB_04,&CPU::OpcodeCB_05,&CPU::OpcodeCB_06,&CPU::OpcodeCB_07,&CPU::OpcodeCB_08,&CPU::OpcodeCB_09,&CPU::OpcodeCB_0A,&CPU::OpcodeCB_0B,&CPU::OpcodeCB_0C,&CPU::OpcodeCB_0D,&CPU::OpcodeCB_0E,&CPU::OpcodeCB_0F,
+			&CPU::OpcodeCB_10,&CPU::OpcodeCB_11,&CPU::OpcodeCB_12,&CPU::OpcodeCB_13,&CPU::OpcodeCB_14,&CPU::OpcodeCB_15,&CPU::OpcodeCB_16,&CPU::OpcodeCB_17,&CPU::OpcodeCB_18,&CPU::OpcodeCB_19,&CPU::OpcodeCB_1A,&CPU::OpcodeCB_1B,&CPU::OpcodeCB_1C,&CPU::OpcodeCB_1D,&CPU::OpcodeCB_1E,&CPU::OpcodeCB_1F,
+			&CPU::OpcodeCB_20,&CPU::OpcodeCB_21,&CPU::OpcodeCB_22,&CPU::OpcodeCB_23,&CPU::OpcodeCB_24,&CPU::OpcodeCB_25,&CPU::OpcodeCB_26,&CPU::OpcodeCB_27,&CPU::OpcodeCB_28,&CPU::OpcodeCB_29,&CPU::OpcodeCB_2A,&CPU::OpcodeCB_2B,&CPU::OpcodeCB_2C,&CPU::OpcodeCB_2D,&CPU::OpcodeCB_2E,&CPU::OpcodeCB_2F,
+			&CPU::OpcodeCB_30,&CPU::OpcodeCB_31,&CPU::OpcodeCB_32,&CPU::OpcodeCB_33,&CPU::OpcodeCB_34,&CPU::OpcodeCB_35,&CPU::OpcodeCB_36,&CPU::OpcodeCB_37,&CPU::OpcodeCB_38,&CPU::OpcodeCB_39,&CPU::OpcodeCB_3A,&CPU::OpcodeCB_3B,&CPU::OpcodeCB_3C,&CPU::OpcodeCB_3D,&CPU::OpcodeCB_3E,&CPU::OpcodeCB_3F,
+			&CPU::OpcodeCB_40,&CPU::OpcodeCB_41,&CPU::OpcodeCB_42,&CPU::OpcodeCB_43,&CPU::OpcodeCB_44,&CPU::OpcodeCB_45,&CPU::OpcodeCB_46,&CPU::OpcodeCB_47,&CPU::OpcodeCB_48,&CPU::OpcodeCB_49,&CPU::OpcodeCB_4A,&CPU::OpcodeCB_4B,&CPU::OpcodeCB_4C,&CPU::OpcodeCB_4D,&CPU::OpcodeCB_4E,&CPU::OpcodeCB_4F,
+			&CPU::OpcodeCB_50,&CPU::OpcodeCB_51,&CPU::OpcodeCB_52,&CPU::OpcodeCB_53,&CPU::OpcodeCB_54,&CPU::OpcodeCB_55,&CPU::OpcodeCB_56,&CPU::OpcodeCB_57,&CPU::OpcodeCB_58,&CPU::OpcodeCB_59,&CPU::OpcodeCB_5A,&CPU::OpcodeCB_5B,&CPU::OpcodeCB_5C,&CPU::OpcodeCB_5D,&CPU::OpcodeCB_5E,&CPU::OpcodeCB_5F,
+			&CPU::OpcodeCB_60,&CPU::OpcodeCB_61,&CPU::OpcodeCB_62,&CPU::OpcodeCB_63,&CPU::OpcodeCB_64,&CPU::OpcodeCB_65,&CPU::OpcodeCB_66,&CPU::OpcodeCB_67,&CPU::OpcodeCB_68,&CPU::OpcodeCB_69,&CPU::OpcodeCB_6A,&CPU::OpcodeCB_6B,&CPU::OpcodeCB_6C,&CPU::OpcodeCB_6D,&CPU::OpcodeCB_6E,&CPU::OpcodeCB_6F,
+			&CPU::OpcodeCB_70,&CPU::OpcodeCB_71,&CPU::OpcodeCB_72,&CPU::OpcodeCB_73,&CPU::OpcodeCB_74,&CPU::OpcodeCB_75,&CPU::OpcodeCB_76,&CPU::OpcodeCB_77,&CPU::OpcodeCB_78,&CPU::OpcodeCB_79,&CPU::OpcodeCB_7A,&CPU::OpcodeCB_7B,&CPU::OpcodeCB_7C,&CPU::OpcodeCB_7D,&CPU::OpcodeCB_7E,&CPU::OpcodeCB_7F,
+			&CPU::OpcodeCB_80,&CPU::OpcodeCB_81,&CPU::OpcodeCB_82,&CPU::OpcodeCB_83,&CPU::OpcodeCB_84,&CPU::OpcodeCB_85,&CPU::OpcodeCB_86,&CPU::OpcodeCB_87,&CPU::OpcodeCB_88,&CPU::OpcodeCB_89,&CPU::OpcodeCB_8A,&CPU::OpcodeCB_8B,&CPU::OpcodeCB_8C,&CPU::OpcodeCB_8D,&CPU::OpcodeCB_8E,&CPU::OpcodeCB_8F,
+			&CPU::OpcodeCB_90,&CPU::OpcodeCB_91,&CPU::OpcodeCB_92,&CPU::OpcodeCB_93,&CPU::OpcodeCB_94,&CPU::OpcodeCB_95,&CPU::OpcodeCB_96,&CPU::OpcodeCB_97,&CPU::OpcodeCB_98,&CPU::OpcodeCB_99,&CPU::OpcodeCB_9A,&CPU::OpcodeCB_9B,&CPU::OpcodeCB_9C,&CPU::OpcodeCB_9D,&CPU::OpcodeCB_9E,&CPU::OpcodeCB_9F,
+			&CPU::OpcodeCB_A0,&CPU::OpcodeCB_A1,&CPU::OpcodeCB_A2,&CPU::OpcodeCB_A3,&CPU::OpcodeCB_A4,&CPU::OpcodeCB_A5,&CPU::OpcodeCB_A6,&CPU::OpcodeCB_A7,&CPU::OpcodeCB_A8,&CPU::OpcodeCB_A9,&CPU::OpcodeCB_AA,&CPU::OpcodeCB_AB,&CPU::OpcodeCB_AC,&CPU::OpcodeCB_AD,&CPU::OpcodeCB_AE,&CPU::OpcodeCB_AF,
+			&CPU::OpcodeCB_B0,&CPU::OpcodeCB_B1,&CPU::OpcodeCB_B2,&CPU::OpcodeCB_B3,&CPU::OpcodeCB_B4,&CPU::OpcodeCB_B5,&CPU::OpcodeCB_B6,&CPU::OpcodeCB_B7,&CPU::OpcodeCB_B8,&CPU::OpcodeCB_B9,&CPU::OpcodeCB_BA,&CPU::OpcodeCB_BB,&CPU::OpcodeCB_BC,&CPU::OpcodeCB_BD,&CPU::OpcodeCB_BE,&CPU::OpcodeCB_BF,
+			&CPU::OpcodeCB_C0,&CPU::OpcodeCB_C1,&CPU::OpcodeCB_C2,&CPU::OpcodeCB_C3,&CPU::OpcodeCB_C4,&CPU::OpcodeCB_C5,&CPU::OpcodeCB_C6,&CPU::OpcodeCB_C7,&CPU::OpcodeCB_C8,&CPU::OpcodeCB_C9,&CPU::OpcodeCB_CA,&CPU::OpcodeCB_CB,&CPU::OpcodeCB_CC,&CPU::OpcodeCB_CD,&CPU::OpcodeCB_CE,&CPU::OpcodeCB_CF,
+			&CPU::OpcodeCB_D0,&CPU::OpcodeCB_D1,&CPU::OpcodeCB_D2,&CPU::OpcodeCB_D3,&CPU::OpcodeCB_D4,&CPU::OpcodeCB_D5,&CPU::OpcodeCB_D6,&CPU::OpcodeCB_D7,&CPU::OpcodeCB_D8,&CPU::OpcodeCB_D9,&CPU::OpcodeCB_DA,&CPU::OpcodeCB_DB,&CPU::OpcodeCB_DC,&CPU::OpcodeCB_DD,&CPU::OpcodeCB_DE,&CPU::OpcodeCB_DF,
+			&CPU::OpcodeCB_E0,&CPU::OpcodeCB_E1,&CPU::OpcodeCB_E2,&CPU::OpcodeCB_E3,&CPU::OpcodeCB_E4,&CPU::OpcodeCB_E5,&CPU::OpcodeCB_E6,&CPU::OpcodeCB_E7,&CPU::OpcodeCB_E8,&CPU::OpcodeCB_E9,&CPU::OpcodeCB_EA,&CPU::OpcodeCB_EB,&CPU::OpcodeCB_EC,&CPU::OpcodeCB_ED,&CPU::OpcodeCB_EE,&CPU::OpcodeCB_EF,
+			&CPU::OpcodeCB_F0,&CPU::OpcodeCB_F1,&CPU::OpcodeCB_F2,&CPU::OpcodeCB_F3,&CPU::OpcodeCB_F4,&CPU::OpcodeCB_F5,&CPU::OpcodeCB_F6,&CPU::OpcodeCB_F7,&CPU::OpcodeCB_F8,&CPU::OpcodeCB_F9,&CPU::OpcodeCB_FA,&CPU::OpcodeCB_FB,&CPU::OpcodeCB_FC,&CPU::OpcodeCB_FD,&CPU::OpcodeCB_FE,&CPU::OpcodeCB_FF
 		};
-
-		union
-		{
-			struct
-			{
-				byte E;
-				byte D;
-			};
-			ushort DE;
-		};
-
-
-		union
-		{
-			struct
-			{
-				byte L;
-				byte H;
-			};
-			ushort HL;
-		};
-
-
-		ushort SP;
-		ushort PC;
-	};
-
-	uint m_cycles;
-
-	const opcode_func opcodes[256] =
-	{
-		// 0xN0,		0xN1,           0xN2,				0xN3,			0xN4,			0xN5,			0xN6,			0xN7,			0xN8,               0xN9,           0xNA,				0xNB,			0xNC,			0xND,			0xNE,				0xNF
-		&Cpu::NOP,		&Cpu::LD_BC_nn, &Cpu::LD_BCA,		&Cpu::INC_BC,	&Cpu::INC_B,	&Cpu::DEC_B,	&Cpu::LD_Bn,	&Cpu::RLCA,		&Cpu::LD_addrNN_SP, &Cpu::ADD_HLBC, &Cpu::LD_ABC,		&Cpu::DEC_BC,	&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_Cn,		&Cpu::NOP,		// 0x00-0x0F
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_DEA,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_Dn,	&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::LD_ADE,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_En,		&Cpu::NOP,		// 0x10-0x1F
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_Hn,	&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_Ln,		&Cpu::NOP,		// 0x20-0x2F
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_ANumber,	&Cpu::NOP,		// 0x30-0x3F
-		&Cpu::LD_BB,	&Cpu::LD_BC,	&Cpu::LD_BD,		&Cpu::LD_BE,	&Cpu::LD_BH,	&Cpu::LD_BL,	&Cpu::LD_BHL,	&Cpu::LD_BA,	&Cpu::LD_CB,		&Cpu::LD_CC,	&Cpu::LD_CD,		&Cpu::LD_CE,	&Cpu::LD_CH,	&Cpu::LD_CL,	&Cpu::LD_CHL,		&Cpu::LD_CA,	// 0x40-0x4F
-		&Cpu::LD_DB,	&Cpu::LD_DC,	&Cpu::LD_DD,		&Cpu::LD_DE,	&Cpu::LD_DH,	&Cpu::LD_DL,	&Cpu::LD_DHL,	&Cpu::LD_DA,	&Cpu::LD_EB,		&Cpu::LD_EC,	&Cpu::LD_ED,		&Cpu::LD_EE,	&Cpu::LD_EH,	&Cpu::LD_EL,	&Cpu::LD_EHL,		&Cpu::LD_EA,	// 0x50-0x5F
-		&Cpu::LD_HB,	&Cpu::LD_HC,	&Cpu::LD_HD,		&Cpu::LD_HE,	&Cpu::LD_HH,	&Cpu::LD_HL,	&Cpu::LD_HHL,	&Cpu::LD_HA,	&Cpu::LD_LB,		&Cpu::LD_LC,	&Cpu::LD_LD,		&Cpu::LD_LE,	&Cpu::LD_LH,	&Cpu::LD_LL,	&Cpu::LD_LHL,		&Cpu::LD_LA,	// 0x60-0x6F
-		&Cpu::LD_HLB,	&Cpu::LD_HLC,	&Cpu::LD_HLD,		&Cpu::LD_HLE,	&Cpu::LD_HLH,	&Cpu::LD_HLL,	&Cpu::LD_HLn,	&Cpu::LD_HLA,	&Cpu::LD_AB,		&Cpu::LD_AC,	&Cpu::LD_AD,		&Cpu::LD_AE,	&Cpu::LD_AH,	&Cpu::LD_AL,	&Cpu::LD_AHL,		&Cpu::LD_AA,	// 0x70-0x7F
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		// 0x80-0x8F
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		// 0x90-0x9F
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		// 0xA0-0xAF
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		// 0xB0-0xBF
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		// 0xC0-0xCF
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		// 0xD0-0xDF
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_AdrrC_A,	&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::LD_nnA,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		// 0xE0-0xEF
-		&Cpu::NOP,		&Cpu::NOP,		&Cpu::LD_A_AdrrC,	&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP,		&Cpu::LD_Ann,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,		&Cpu::NOP,			&Cpu::NOP		// 0xF0-0xFF
-	};
 
 #pragma endregion
 
-	Registers registers;
-public:
-	Cpu();
-	bool Initialize();
-	void Run(Memory& mem);
+	#pragma region Fields
+	private:
+		Register af;
+		Register bc;
+		Register de;
+		Register hl;
+		Register pc;
+		Register sp;
 
-#pragma region Accessors/Mutators
-	// Accessor/Mutators
-	// Regsiter A
-	byte GetRegA() const {return registers.A;}
-	void SetRegA(byte value) { registers.A = value; }
-	// Register F, Flag Register
-	void ClearFlags() { registers.F = 0; } // m_Flags.c = m_Flags.h = m_Flags.n = m_Flags.z = m_Flags.unused = 0;
+		MMU mmu;
+		ALU alu;
 
-	bool GetZFlag() 
-	{
-		return (bool)(registers.F >> 8) & 0xFC;
-	}
-	//bool GetNFlag() { return m_Flags.n; }
-	//bool GetHFlag() { return m_Flags.h; }
-	//bool GetCFlag() { return m_Flags.c; }
-	//void SetZFlag(bool bit) { m_Flags.z = bit; }
-	//void SetNFlag(bool bit) { m_Flags.n = bit; }
-	//void SetHFlag(bool bit) { m_Flags.h = bit; }
-	//void SetCFlag(bool bit) { m_Flags.c = bit; }
-	//// Reg B
-	byte GetRegB() const {return registers.B;}
-	void SetRegB(byte value) { registers.B = value; }
-	// register C
-	byte GetRegC() const {return registers.C;}
-	void SetRegC(byte value) { registers.C = value; }
-	// register BC
-	short GetRegBC() const {return (registers.B << 8) | registers.C;}
-	void SetRegBC(short value) { registers.B = (value >> 8) & 0xFF; registers.C = value & 0xFF; }
-	// Register D
-	byte GetRegD() const {return registers.D;}
-	void SetRegD(byte value) { registers.D = value; }
-	// register E
-	byte GetRegE() const {return registers.E;}
-	void SetRegE(byte value) { registers.E = value; }
-	// register DE
-	short GetRegDE() const {return (registers.D << 8) | registers.E;}
-	void SetRegDE(short value) { registers.D = (value >> 8) & 0xFF; registers.E = value & 0xFF; }
-	// Register H
-	byte GetRegH() const {return registers.H;}
-	void SetRegH(byte value) { registers.H = value; }
-	// register L
-	byte GetRegL() const {return registers.L;}
-	void SetRegL(byte value) { registers.L = value; }
-	// register HL
-	short GetRegHL() const {return (registers.H << 8) | registers.L;}
-	void SetRegHL(short value) { registers.H = (value >> 8) & 0xFF; registers.L = value & 0xFF; }
-	// Register SP
-	short GetStackPointer() const { return registers.SP; }
-	void SetStackPointer(short value) { registers.SP = value; }
-	// Register PC
-	short GetProgramCounter()const { return registers.PC; }
-	void SetProgramCounter(short value) { registers.PC = value; }
-#pragma endregion
-private:
-
-	static int Load16BitImmediate(Memory mem, Registers* regs);
-/* 
-opcode 0xXX X bytes, X cycles
-Descritpion: 
-args: 
-*/
-#pragma region Commands
-
-	#pragma region 8 - Bit Loads
-	/*
-	1. LD nn,n
-		Description:
-		 Put value nn into n.
-		Use with:
-		 nn = B,C,D,E,H,L,BC,DE,HL,SP
-		 n = 8 bit immediate value
-
-		 2 bytes, 8 cycles
-	*/	
-	// opcode 0x06 
-	uint LD_Bn(Memory& mem);
-	// opcode 0x0E 
-	uint LD_Cn(Memory& mem);
-	// opcode 0x16 
-	uint LD_Dn(Memory& mem);
-	// opcode 0x1E 
-	uint LD_En(Memory& mem);
-	// opcode 0x26 
-	uint LD_Hn(Memory& mem);
-	// opcode 0x2E 
-	uint LD_Ln(Memory& mem);
-	/*
-	2. LD r1,r2
-		Description:
-		 Put value r2 into r1.
-		Use with:
-		 r1,r2 = A,B,C,D,E,H,L,(HL)
-	*/
-	// opcode 7F; 4 cycles
-	uint LD_AA(Memory& mem);
-	// opcode 78; 4 cycles
-	uint LD_AB(Memory& mem);
-	// opcode 79; 4 cycles
-	uint LD_AC(Memory& mem);
-	// opcode 7A; 4 cycles
-	uint LD_AD(Memory& mem);
-	// opcode 7B; 4 cycles
-	uint LD_AE(Memory& mem);
-	// opcode 7C; 4 cycles
-	uint LD_AH(Memory& mem);
-	// opcode 7D; 4 cycles
-	uint LD_AL(Memory& mem);
-	// opcode 7E; 8 cycles
-	uint LD_AHL(Memory& mem);
-
-	// opcode 40; 4 cycles
-	uint LD_BB(Memory& mem);
-	// opcode 41; 4 cycles
-	uint LD_BC(Memory& mem);
-	// opcode 42; 4 cycles
-	uint LD_BD(Memory& mem);
-	// opcode 43; 4 cycles
-	uint LD_BE(Memory& mem);
-	// opcode 44; 4 cycles
-	uint LD_BH(Memory& mem);
-	// opcode 45; 4 cycles
-	uint LD_BL(Memory& mem);
-	// opcode 46; 8 cycles
-	uint LD_BHL(Memory& mem);
-
-	// opcode 48; 4 cycles
-	uint LD_CB(Memory& mem);
-	// opcode 49; 4 cycles
-	uint LD_CC(Memory& mem);
-	// opcode 4A; 4 cycles
-	uint LD_CD(Memory& mem);
-	// opcode 4B; 4 cycles
-	uint LD_CE(Memory& mem);
-	// opcode 4C; 4 cycles
-	uint LD_CH(Memory& mem);
-	// opcode 4D; 4 cycles
-	uint LD_CL(Memory& mem);
-	// opcode 4E; 8 cycles
-	uint LD_CHL(Memory& mem);
-
-	// opcode 50; 4 cycles
-	uint LD_DB(Memory& mem);
-	// opcode 51; 4 cycles
-	uint LD_DC(Memory& mem);
-	// opcode 52; 4 cycles
-	uint LD_DD(Memory& mem);
-	// opcode 53; 4 cycles
-	uint LD_DE(Memory& mem);
-	// opcode 54; 4 cycles
-	uint LD_DH(Memory& mem);
-	// opcode 55; 4 cycles
-	uint LD_DL(Memory& mem);
-	// opcode 56; 8 cycles
-	uint LD_DHL(Memory& mem);
-
-	// opcode 58; 4 cycles
-	uint LD_EB(Memory& mem);
-	// opcode 59; 4 cycles
-	uint LD_EC(Memory& mem);
-	// opcode 5A; 4 cycles
-	uint LD_ED(Memory& mem);
-	// opcode 5B; 4 cycles
-	uint LD_EE(Memory& mem);
-	// opcode 5C; 4 cycles
-	uint LD_EH(Memory& mem);
-	// opcode 5D; 4 cycles
-	uint LD_EL(Memory& mem);
-	// opcode 5E; 8 cycles
-	uint LD_EHL(Memory& mem);
-
-	// opcode 60; 4 cycles
-	uint LD_HB(Memory& mem);
-	// opcode 61; 4 cycles
-	uint LD_HC(Memory& mem);
-	// opcode 62; 4 cycles
-	uint LD_HD(Memory& mem);
-	// opcode 63; 4 cycles
-	uint LD_HE(Memory& mem);
-	// opcode 64; 4 cycles
-	uint LD_HH(Memory& mem);
-	// opcode 65; 4 cycles
-	uint LD_HL(Memory& mem);
-	// opcode 66; 8 cycles
-	uint LD_HHL(Memory& mem);
-
-	// opcode 68; 4 cycles
-	uint LD_LB(Memory& mem);
-	// opcode 69; 4 cycles
-	uint LD_LC(Memory& mem);
-	// opcode 6A; 4 cycles
-	uint LD_LD(Memory& mem);
-	// opcode 6B; 4 cycles
-	uint LD_LE(Memory& mem);
-	// opcode 6C; 4 cycles
-	uint LD_LH(Memory& mem);
-	// opcode 6D; 4 cycles
-	uint LD_LL(Memory& mem);
-	// opcode 6E; 8 cycles
-	uint LD_LHL(Memory& mem);
-
-	// opcode 70;  cycles
-	uint LD_HLB(Memory& mem);
-	// opcode 71; 8 cycles
-	uint LD_HLC(Memory& mem);
-	// opcode 72; 8 cycles
-	uint LD_HLD(Memory& mem);
-	// opcode 73; 8 cycles
-	uint LD_HLE(Memory& mem);
-	// opcode 74; 8 cycles
-	uint LD_HLH(Memory& mem);
-	// opcode 75; 8 cycles
-	uint LD_HLL(Memory& mem);
-	// opcode 36; 12 cycles
-	uint LD_HLn(Memory& mem);
-
-	/*
-	3. LD A,n
-		Description:
-		 Put value n into A.
-		Use with:
-		 n = A,B,C,D,E,H,L,(BC),(DE),(HL),(nn),#
-		 nn = two byte immediate value. (LS byte first.)
-	*/
-	// opcode 0A; 8 cycles
-	uint LD_ABC(Memory& mem);
-	// opcode 1A; 8 cycles
-	uint LD_ADE(Memory& mem);
-	// opcode FA; 16 cycles
-	uint LD_Ann(Memory& mem);
-	// opcode 3E; 8 cycles
-	uint LD_ANumber(Memory& mem);
-
-	/*
-	4. LD n,A
-		Description:
-		 Put value A into n.
-		Use with:
-		 n = A,B,C,D,E,H,L,(BC),(DE),(HL),(nn)
-		 nn = two byte immediate value. (LS byte first.)
-	*/
-	// opcode 47; 4 cycles
-	uint LD_BA(Memory& mem);
-	// opcode 4F; 4 cycles
-	uint LD_CA(Memory& mem);
-	// opcode 57; 4 cycles
-	uint LD_DA(Memory& mem);
-	// opcode 5F; 4 cycles
-	uint LD_EA(Memory& mem);
-	// opcode 67; 4 cycles
-	uint LD_HA(Memory& mem);
-	// opcode 6F; 4 cycles
-	uint LD_LA(Memory& mem);
-	// opcode 2; 8 cycles
-	uint LD_BCA(Memory& mem);
-	// opcode 12; 8 cycles
-	uint LD_DEA(Memory& mem);
-	// opcode 77; 8 cycles
-	uint LD_HLA(Memory& mem);
-	// opcode EA; 16 cycles
-	uint LD_nnA(Memory& mem);
-
-	/*
-	5. LD A,(C)
-		Description:
-		 Put value at address $FF00 + register C into A.
-		 Same as: LD A,($FF00+C)
-	*/
-	// opcode F2; 8 cycles
-	uint LD_A_AdrrC(Memory& mem);
-
-	/*
-	6. LD (C),A
-		Description:
-		 Put A into address $FF00 + register C.
-	*/
-	// opcode E2; 8 cycles
-	uint LD_AdrrC_A(Memory& mem);
-
-	/*
-	7. LD A,(HLD)
-		Description: Same as: LDD A,(HL)
-	8. LD A,(HL-)
-		Description: Same as: LDD A,(HL)
-	9. LDD A,(HL)
-		Description:
-		 Put value at address HL into A. Decrement HL.
-		 Same as: LD A,(HL) - DEC HL
-	*/
-	// 
-	#pragma endregion
-
-
-// all command return the number of cycles executed
-
-	// opcode 0x00 1 byte, 4 cycles
-	uint NOP(Memory& mem);
-
-	/* opcode 0x01 3 bytes, 12 cycles
-	 Descritpion: Put value nn into BC
-	 args: nn = 16 bit immediate value */
-	uint LD_BC_nn(Memory& mem);
-
-	/* opcode 0x02 1 bytes, 8 cycles
-	 Descritpion: Put A into (BC) */
-	uint LD_addrBC_A(Memory& mem);
-
-	/* opcode 0x03 1 bytes, 8 cycles
-	 Descritpion: Increment register BC
-	 Flags: NONE */
-	uint INC_BC(Memory& mem);
-
-	/* opcode 0x04 1 bytes, 4 cycles
-	 Descritpion: Increment register B
-	 Flags:
-		Z - Set if result is zero.
-		N - Reset.
-		H - Set if carry from bit 3.
-		C - Not affected */
-	uint INC_B(Memory& mem);
-
-	/*
-	opcode 0x05 1 bytes, 4 cycles
-	Descritpion: Decrement register B
-	Flags:
-		Z - Set if reselt is zero.
-		N - Set.
-		H - Set if no borrow from bit 4.
-		C - Not affected.
-	*/
-	uint DEC_B(Memory& mem);	
-
-	/*
-	opcode 0x07 1 bytes, 4 cycles
-	Descritpion: Rotate A left. Old bit 7 to Carry flag.
-	Flags:
-		Z - Set if result is zero.
-		N - Reset.
-		H - Reset.
-		C - Contains old bit 7 data.
-	*/
-	uint RLCA(Memory& mem);
-
-	/*
-	opcode 0x08 3 bytes, 20 cycles
-	Descritpion: Put Stack Pointer (SP) at address nn
-	args: nn = two byte immediate address.
-	*/
-	uint LD_addrNN_SP(Memory& mem);
-
-	/*
-	opcode 0x09 1 bytes, 8 cycles
-	Descritpion: Add BC to HL.
-	Flags:
-		Z - Not affected.
-		N - Reset.
-		H - Set if carry from bit 11.
-		C - Set if carry from bit 15.
-	*/
-	uint ADD_HLBC(Memory& mem);
-
-	/*
-	opcode 0x0A 1 bytes, 8 cycles
-	Descritpion: put value of (BC) in A
-	args: (BC) is address 
-	*/
-	uint LD_AaddrBC(Memory& mem);
-
-	/*
-	opcode 0x0B 1 bytes, 8 cycles
-	Descritpion: Decrement BC
-	Flags: NONE
-	*/
-	uint DEC_BC(Memory& mem);
-
+		int cycleCount;
+		bool halt;
+		bool stop;
+		bool disableInterrupts;
+		bool enableInterrupts;
+		const int MAXCYCLES = 69905;
 
 #pragma endregion
 
-//#endif
-};
+	#pragma region Methods
+	public:
+		CPU();
+		~CPU();
+		void Execute();
 
+	private:
+		u8 Load8BitImmediateValue();
+		u16 Load16BitImmediateValue();
+		void ExecuteNextOpcode();
+		void UpdateTimers();
+		void UpdateGraphics();
+		void RunInterrupts();
+	
+		#pragma region Opcodes
+		void Opcode00();
+		void Opcode01();
+		void Opcode02();
+		void Opcode03();
+		void Opcode04();
+		void Opcode05();
+		void Opcode06();
+		void Opcode07();
+		void Opcode08();
+		void Opcode09();
+		void Opcode0A();
+		void Opcode0B();
+		void Opcode0C();
+		void Opcode0D();
+		void Opcode0E();
+		void Opcode0F();
+		void Opcode10();
+		void Opcode11();
+		void Opcode12();
+		void Opcode13();
+		void Opcode14();
+		void Opcode15();
+		void Opcode16();
+		void Opcode17();
+		void Opcode18();
+		void Opcode19();
+		void Opcode1A();
+		void Opcode1B();
+		void Opcode1C();
+		void Opcode1D();
+		void Opcode1E();
+		void Opcode1F();
+		void Opcode20();
+		void Opcode21();
+		void Opcode22();
+		void Opcode23();
+		void Opcode24();
+		void Opcode25();
+		void Opcode26();
+		void Opcode27();
+		void Opcode28();
+		void Opcode29();
+		void Opcode2A();
+		void Opcode2B();
+		void Opcode2C();
+		void Opcode2D();
+		void Opcode2E();
+		void Opcode2F();
+		void Opcode30();
+		void Opcode31();
+		void Opcode32();
+		void Opcode33();
+		void Opcode34();
+		void Opcode35();
+		void Opcode36();
+		void Opcode37();
+		void Opcode38();
+		void Opcode39();
+		void Opcode3A();
+		void Opcode3B();
+		void Opcode3C();
+		void Opcode3D();
+		void Opcode3E();
+		void Opcode3F();
+		void Opcode40();
+		void Opcode41();
+		void Opcode42();
+		void Opcode43();
+		void Opcode44();
+		void Opcode45();
+		void Opcode46();
+		void Opcode47();
+		void Opcode48();
+		void Opcode49();
+		void Opcode4A();
+		void Opcode4B();
+		void Opcode4C();
+		void Opcode4D();
+		void Opcode4E();
+		void Opcode4F();
+		void Opcode50();
+		void Opcode51();
+		void Opcode52();
+		void Opcode53();
+		void Opcode54();
+		void Opcode55();
+		void Opcode56();
+		void Opcode57();
+		void Opcode58();
+		void Opcode59();
+		void Opcode5A();
+		void Opcode5B();
+		void Opcode5C();
+		void Opcode5D();
+		void Opcode5E();
+		void Opcode5F();
+		void Opcode60();
+		void Opcode61();
+		void Opcode62();
+		void Opcode63();
+		void Opcode64();
+		void Opcode65();
+		void Opcode66();
+		void Opcode67();
+		void Opcode68();
+		void Opcode69();
+		void Opcode6A();
+		void Opcode6B();
+		void Opcode6C();
+		void Opcode6D();
+		void Opcode6E();
+		void Opcode6F();
+		void Opcode70();
+		void Opcode71();
+		void Opcode72();
+		void Opcode73();
+		void Opcode74();
+		void Opcode75();
+		void Opcode76();
+		void Opcode77();
+		void Opcode78();
+		void Opcode79();
+		void Opcode7A();
+		void Opcode7B();
+		void Opcode7C();
+		void Opcode7D();
+		void Opcode7E();
+		void Opcode7F();
+		void Opcode80();
+		void Opcode81();
+		void Opcode82();
+		void Opcode83();
+		void Opcode84();
+		void Opcode85();
+		void Opcode86();
+		void Opcode87();
+		void Opcode88();
+		void Opcode89();
+		void Opcode8A();
+		void Opcode8B();
+		void Opcode8C();
+		void Opcode8D();
+		void Opcode8E();
+		void Opcode8F();
+		void Opcode90();
+		void Opcode91();
+		void Opcode92();
+		void Opcode93();
+		void Opcode94();
+		void Opcode95();
+		void Opcode96();
+		void Opcode97();
+		void Opcode98();
+		void Opcode99();
+		void Opcode9A();
+		void Opcode9B();
+		void Opcode9C();
+		void Opcode9D();
+		void Opcode9E();
+		void Opcode9F();
+		void OpcodeA0();
+		void OpcodeA1();
+		void OpcodeA2();
+		void OpcodeA3();
+		void OpcodeA4();
+		void OpcodeA5();
+		void OpcodeA6();
+		void OpcodeA7();
+		void OpcodeA8();
+		void OpcodeA9();
+		void OpcodeAA();
+		void OpcodeAB();
+		void OpcodeAC();
+		void OpcodeAD();
+		void OpcodeAE();
+		void OpcodeAF();
+		void OpcodeB0();
+		void OpcodeB1();
+		void OpcodeB2();
+		void OpcodeB3();
+		void OpcodeB4();
+		void OpcodeB5();
+		void OpcodeB6();
+		void OpcodeB7();
+		void OpcodeB8();
+		void OpcodeB9();
+		void OpcodeBA();
+		void OpcodeBB();
+		void OpcodeBC();
+		void OpcodeBD();
+		void OpcodeBE();
+		void OpcodeBF();
+		void OpcodeC0();
+		void OpcodeC1();
+		void OpcodeC2();
+		void OpcodeC3();
+		void OpcodeC4();
+		void OpcodeC5();
+		void OpcodeC6();
+		void OpcodeC7();
+		void OpcodeC8();
+		void OpcodeC9();
+		void OpcodeCA();
+		void OpcodeCB();
+		void OpcodeCC();
+		void OpcodeCD();
+		void OpcodeCE();
+		void OpcodeCF();
+		void OpcodeD0();
+		void OpcodeD1();
+		void OpcodeD2();
+		void OpcodeD3();
+		void OpcodeD4();
+		void OpcodeD5();
+		void OpcodeD6();
+		void OpcodeD7();
+		void OpcodeD8();
+		void OpcodeD9();
+		void OpcodeDA();
+		void OpcodeDB();
+		void OpcodeDC();
+		void OpcodeDD();
+		void OpcodeDE();
+		void OpcodeDF();
+		void OpcodeE0();
+		void OpcodeE1();
+		void OpcodeE2();
+		void OpcodeE3();
+		void OpcodeE4();
+		void OpcodeE5();
+		void OpcodeE6();
+		void OpcodeE7();
+		void OpcodeE8();
+		void OpcodeE9();
+		void OpcodeEA();
+		void OpcodeEB();
+		void OpcodeEC();
+		void OpcodeED();
+		void OpcodeEE();
+		void OpcodeEF();
+		void OpcodeF0();
+		void OpcodeF1();
+		void OpcodeF2();
+		void OpcodeF3();
+		void OpcodeF4();
+		void OpcodeF5();
+		void OpcodeF6();
+		void OpcodeF7();
+		void OpcodeF8();
+		void OpcodeF9();
+		void OpcodeFA();
+		void OpcodeFB();
+		void OpcodeFC();
+		void OpcodeFD();
+		void OpcodeFE();
+		void OpcodeFF();
+
+		void OpcodeCB_00();
+		void OpcodeCB_01();
+		void OpcodeCB_02();
+		void OpcodeCB_03();
+		void OpcodeCB_04();
+		void OpcodeCB_05();
+		void OpcodeCB_06();
+		void OpcodeCB_07();
+		void OpcodeCB_08();
+		void OpcodeCB_09();
+		void OpcodeCB_0A();
+		void OpcodeCB_0B();
+		void OpcodeCB_0C();
+		void OpcodeCB_0D();
+		void OpcodeCB_0E();
+		void OpcodeCB_0F();
+		void OpcodeCB_10();
+		void OpcodeCB_11();
+		void OpcodeCB_12();
+		void OpcodeCB_13();
+		void OpcodeCB_14();
+		void OpcodeCB_15();
+		void OpcodeCB_16();
+		void OpcodeCB_17();
+		void OpcodeCB_18();
+		void OpcodeCB_19();
+		void OpcodeCB_1A();
+		void OpcodeCB_1B();
+		void OpcodeCB_1C();
+		void OpcodeCB_1D();
+		void OpcodeCB_1E();
+		void OpcodeCB_1F();
+		void OpcodeCB_20();
+		void OpcodeCB_21();
+		void OpcodeCB_22();
+		void OpcodeCB_23();
+		void OpcodeCB_24();
+		void OpcodeCB_25();
+		void OpcodeCB_26();
+		void OpcodeCB_27();
+		void OpcodeCB_28();
+		void OpcodeCB_29();
+		void OpcodeCB_2A();
+		void OpcodeCB_2B();
+		void OpcodeCB_2C();
+		void OpcodeCB_2D();
+		void OpcodeCB_2E();
+		void OpcodeCB_2F();
+		void OpcodeCB_30();
+		void OpcodeCB_31();
+		void OpcodeCB_32();
+		void OpcodeCB_33();
+		void OpcodeCB_34();
+		void OpcodeCB_35();
+		void OpcodeCB_36();
+		void OpcodeCB_37();
+		void OpcodeCB_38();
+		void OpcodeCB_39();
+		void OpcodeCB_3A();
+		void OpcodeCB_3B();
+		void OpcodeCB_3C();
+		void OpcodeCB_3D();
+		void OpcodeCB_3E();
+		void OpcodeCB_3F();
+		void OpcodeCB_40();
+		void OpcodeCB_41();
+		void OpcodeCB_42();
+		void OpcodeCB_43();
+		void OpcodeCB_44();
+		void OpcodeCB_45();
+		void OpcodeCB_46();
+		void OpcodeCB_47();
+		void OpcodeCB_48();
+		void OpcodeCB_49();
+		void OpcodeCB_4A();
+		void OpcodeCB_4B();
+		void OpcodeCB_4C();
+		void OpcodeCB_4D();
+		void OpcodeCB_4E();
+		void OpcodeCB_4F();
+		void OpcodeCB_50();
+		void OpcodeCB_51();
+		void OpcodeCB_52();
+		void OpcodeCB_53();
+		void OpcodeCB_54();
+		void OpcodeCB_55();
+		void OpcodeCB_56();
+		void OpcodeCB_57();
+		void OpcodeCB_58();
+		void OpcodeCB_59();
+		void OpcodeCB_5A();
+		void OpcodeCB_5B();
+		void OpcodeCB_5C();
+		void OpcodeCB_5D();
+		void OpcodeCB_5E();
+		void OpcodeCB_5F();
+		void OpcodeCB_60();
+		void OpcodeCB_61();
+		void OpcodeCB_62();
+		void OpcodeCB_63();
+		void OpcodeCB_64();
+		void OpcodeCB_65();
+		void OpcodeCB_66();
+		void OpcodeCB_67();
+		void OpcodeCB_68();
+		void OpcodeCB_69();
+		void OpcodeCB_6A();
+		void OpcodeCB_6B();
+		void OpcodeCB_6C();
+		void OpcodeCB_6D();
+		void OpcodeCB_6E();
+		void OpcodeCB_6F();
+		void OpcodeCB_70();
+		void OpcodeCB_71();
+		void OpcodeCB_72();
+		void OpcodeCB_73();
+		void OpcodeCB_74();
+		void OpcodeCB_75();
+		void OpcodeCB_76();
+		void OpcodeCB_77();
+		void OpcodeCB_78();
+		void OpcodeCB_79();
+		void OpcodeCB_7A();
+		void OpcodeCB_7B();
+		void OpcodeCB_7C();
+		void OpcodeCB_7D();
+		void OpcodeCB_7E();
+		void OpcodeCB_7F();
+		void OpcodeCB_80();
+		void OpcodeCB_81();
+		void OpcodeCB_82();
+		void OpcodeCB_83();
+		void OpcodeCB_84();
+		void OpcodeCB_85();
+		void OpcodeCB_86();
+		void OpcodeCB_87();
+		void OpcodeCB_88();
+		void OpcodeCB_89();
+		void OpcodeCB_8A();
+		void OpcodeCB_8B();
+		void OpcodeCB_8C();
+		void OpcodeCB_8D();
+		void OpcodeCB_8E();
+		void OpcodeCB_8F();
+		void OpcodeCB_90();
+		void OpcodeCB_91();
+		void OpcodeCB_92();
+		void OpcodeCB_93();
+		void OpcodeCB_94();
+		void OpcodeCB_95();
+		void OpcodeCB_96();
+		void OpcodeCB_97();
+		void OpcodeCB_98();
+		void OpcodeCB_99();
+		void OpcodeCB_9A();
+		void OpcodeCB_9B();
+		void OpcodeCB_9C();
+		void OpcodeCB_9D();
+		void OpcodeCB_9E();
+		void OpcodeCB_9F();
+		void OpcodeCB_A0();
+		void OpcodeCB_A1();
+		void OpcodeCB_A2();
+		void OpcodeCB_A3();
+		void OpcodeCB_A4();
+		void OpcodeCB_A5();
+		void OpcodeCB_A6();
+		void OpcodeCB_A7();
+		void OpcodeCB_A8();
+		void OpcodeCB_A9();
+		void OpcodeCB_AA();
+		void OpcodeCB_AB();
+		void OpcodeCB_AC();
+		void OpcodeCB_AD();
+		void OpcodeCB_AE();
+		void OpcodeCB_AF();
+		void OpcodeCB_B0();
+		void OpcodeCB_B1();
+		void OpcodeCB_B2();
+		void OpcodeCB_B3();
+		void OpcodeCB_B4();
+		void OpcodeCB_B5();
+		void OpcodeCB_B6();
+		void OpcodeCB_B7();
+		void OpcodeCB_B8();
+		void OpcodeCB_B9();
+		void OpcodeCB_BA();
+		void OpcodeCB_BB();
+		void OpcodeCB_BC();
+		void OpcodeCB_BD();
+		void OpcodeCB_BE();
+		void OpcodeCB_BF();
+		void OpcodeCB_C0();
+		void OpcodeCB_C1();
+		void OpcodeCB_C2();
+		void OpcodeCB_C3();
+		void OpcodeCB_C4();
+		void OpcodeCB_C5();
+		void OpcodeCB_C6();
+		void OpcodeCB_C7();
+		void OpcodeCB_C8();
+		void OpcodeCB_C9();
+		void OpcodeCB_CA();
+		void OpcodeCB_CB();
+		void OpcodeCB_CC();
+		void OpcodeCB_CD();
+		void OpcodeCB_CE();
+		void OpcodeCB_CF();
+		void OpcodeCB_D0();
+		void OpcodeCB_D1();
+		void OpcodeCB_D2();
+		void OpcodeCB_D3();
+		void OpcodeCB_D4();
+		void OpcodeCB_D5();
+		void OpcodeCB_D6();
+		void OpcodeCB_FF();
+		void OpcodeCB_D8();
+		void OpcodeCB_D9();
+		void OpcodeCB_DA();
+		void OpcodeCB_DB();
+		void OpcodeCB_DC();
+		void OpcodeCB_DD();
+		void OpcodeCB_DE();
+		void OpcodeCB_DF();
+		void OpcodeCB_E0();
+		void OpcodeCB_E1();
+		void OpcodeCB_E2();
+		void OpcodeCB_E3();
+		void OpcodeCB_D7();
+		void OpcodeCB_E4();
+		void OpcodeCB_E5();
+		void OpcodeCB_E6();
+		void OpcodeCB_E7();
+		void OpcodeCB_E8();
+		void OpcodeCB_E9();
+		void OpcodeCB_EA();
+		void OpcodeCB_EB();
+		void OpcodeCB_EC();
+		void OpcodeCB_ED();
+		void OpcodeCB_EE();
+		void OpcodeCB_EF();
+		void OpcodeCB_F0();
+		void OpcodeCB_F1();
+		void OpcodeCB_F2();
+		void OpcodeCB_F3();
+		void OpcodeCB_F4();
+		void OpcodeCB_F5();
+		void OpcodeCB_F6();
+		void OpcodeCB_F7();
+		void OpcodeCB_F8();
+		void OpcodeCB_F9();
+		void OpcodeCB_FA();
+		void OpcodeCB_FB();
+		void OpcodeCB_FC();
+		void OpcodeCB_FD();
+		void OpcodeCB_FE();
+#pragma endregion
+
+		//8-Bit Load Methods
+		void LD(u8& reg, u8 value);
+		// 16-Bit Load Methods
+		void LD(u16& reg, u16 value);
+		void Push(u16 value);
+		u16 Pop();
+		void Swap(u8& n);
+		void RLCn(u8& n);
+		void RLn(u8& n);
+		void RRCn(u8& n);
+		void RRn(u8& n);
+		void SLAn(u8& n);
+		void SRAn(u8& n);
+		void SRLn(u8& n);
+		void BITbr(u8 bit, u8& r);
+		void SETbr(u8 bit, u8& r);
+		void RESbr(u8 bit, u8& r);
+#pragma endregion
+
+	};
+}

@@ -20,6 +20,8 @@ build/
 [Oo]bj/
 .vs/
 Roms/
+GBEmu/
+
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
