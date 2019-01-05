@@ -65,10 +65,12 @@ namespace Gameboy
 		MMU* mmu; // pointer to mmu
 		ALU alu;
 
+		std::string lastOpcode;
 		int cycleCount;
 		bool halt;
 		bool stop;
-		bool disableInterrupts;
+		bool pendingDisableInterrupts;
+		bool pendingEnableInterrupts;
 		bool enableInterrupts;
 	public:
 		const int MAXCYCLES = 69905;
@@ -81,16 +83,17 @@ namespace Gameboy
 		~CPU();
 		int ExecuteOpcode();
 		void UpdateTimers();
-		void RunInterrupts();
+		void CheckInterrupts();
 		std::string PrintRegisters();
 
+		void ResetCycleCount();
 		bool IsUpdateFinished();
 
 	private:
 		CPU();
 		u8 Load8BitImmediateValue();
 		u16 Load16BitImmediateValue();
-
+		void RunInterrupts(u8 bit);
 	
 		#pragma region Opcodes
 		void Opcode00();

@@ -7,11 +7,23 @@ namespace Gameboy
 
 	class MMU
 	{
+	public:
+		enum VectorTable
+		{
+			VBlankProceedure = 0x40,
+			LCDStatProceedure = 0x48,
+			TimerProceedure = 0x50,
+			SerialProceedure = 0x58,
+			JoypadProceedure = 0x60
+		};
+
 		enum IORegisters
 		{
-			TIMA = 0xFF05,
-			TMA = 0xFF06,
-			TAC = 0xFF07,
+			DIV = 0xFF04,	// Divider Register (R/W)
+			TIMA = 0xFF05,	// Timer counter (R/W)
+			TMA = 0xFF06,	// Timer Modulo (R/W)
+			TAC = 0xFF07,	// Timer Control (R/W)
+			IF = 0xFF0F,
 			NR10 = 0xFF10,
 			NR11 = 0xFF11,
 			NR12 = 0xFF12,
@@ -30,15 +42,17 @@ namespace Gameboy
 			NR50 = 0xFF24,
 			NR51 = 0xFF25,
 			NR52 = 0xFF26,
-			LCDC = 0xFF40,
-			SCY = 0xFF42,
-			SCX = 0xFF43,
-			LYC = 0xFF45,
-			BGP = 0xFF47,
-			OBP0 = 0xFF48,
-			OBP1 = 0xFF49,
-			WY = 0xFF4A,
-			WX = 0xFF4B,
+			LCDC = 0xFF40,	// LCD Control (R/W)
+			STAT = 0xFF41,	// LCDC Status (R/W)
+			SCY = 0xFF42,	// Scroll Y (R/W)
+			SCX = 0xFF43,	// Scroll X (R/W)
+			LY = 0xFF44,	// LCDC Y-Coordinate (R)
+			LYC = 0xFF45,	// LY Compare (R/W)
+			BGP = 0xFF47,	// BG Palette Data (R/W) - Non CGB Mode Only
+			OBP0 = 0xFF48,	// Object Palette 0 Data (R/W) - Non CGB Mode Only
+			OBP1 = 0xFF49,	// Object Palette 1 Data (R/W) - Non CGB Mode Only
+			WY = 0xFF4A,	// Window Y Position (R/W
+			WX = 0xFF4B,	// Window X Position minus 7 (R/W)
 			IE = 0xFFFF
 		};
 
@@ -57,12 +71,22 @@ namespace Gameboy
 			HRAM = 0xFF80,			//	FFFE	High RAM (HRAM)	
 		};
 
+		enum InterruptBits
+		{
+			VBlank = 1 << 0,
+			LCDStat = 1 << 1,
+			Timer = 1 << 2,
+			Serial = 1 << 3,
+			Joypad = 1 << 4,
+		};
+
 	private:
 		u8 memory[0xFFFF];
 
 	public:
 		MMU();
 		~MMU();
+		void LoadROM(s8* romData, int length);
 		// push value onto stack
 		void Push(Register& sp, u16 value);
 		// pop value from stack

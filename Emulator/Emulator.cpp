@@ -7,6 +7,7 @@ Emulator::Emulator(void) : m_isRunning(false)
 {
 	cartridgeMemory = new char[0x200000];
 
+	mmu.reset(new MMU());
 	// setup the CPU
 	cpu.reset(new CPU(mmu.get()));
 }
@@ -25,33 +26,38 @@ bool Emulator::Initialize()
 
 void Emulator::LoadROM(const char * rom)
 {
-	std::fstream is(rom, std::fstream::in | std::fstream::binary);
+	std::fstream in(rom, std::fstream::in | std::fstream::binary);
 
-	is.seekg(0, is.end);
-	int length = is.tellg();
-	is.seekg(0, is.beg);
+	in.seekg(0, in.end);
+	int length = in.tellg();
+	in.seekg(0, in.beg);
 
 	try
 	{
-		is.read((char*)cartridgeMemory, length);
+		in.read(cartridgeMemory, length);
 	}
 	catch (const std::exception&)
 	{
-		is.close();
+		in.close();
 	}
 	 
-	is.close();
+	in.close();
+
+	mmu->LoadROM((s8*)cartridgeMemory, length);
 }
 
 void Emulator::Run()
 {
+	cpu->ResetCycleCount();
+
 	while (!cpu->IsUpdateFinished())
 	{
 		int cycles = cpu->ExecuteOpcode();
+		//Debug::ClearScreen();
 		Debug::Print(*cpu);
 		cpu->UpdateTimers();
 		//ppu.UpdateGraphics(cycles);
-		cpu->RunInterrupts();
+		cpu->CheckInterrupts();
 	}
 
 	// RenderScreen();

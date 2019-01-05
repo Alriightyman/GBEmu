@@ -6,7 +6,7 @@ class Debug
 {
 public:
 	static void Print(Gameboy::CPU cpu);
-private:
+
 	static void ClearScreen();
 };
 

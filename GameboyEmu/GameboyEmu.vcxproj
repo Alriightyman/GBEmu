@@ -125,6 +125,7 @@
   <ItemGroup>
     <ClCompile Include="ALU.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="CPU.Opcodes.cpp" />
     <ClCompile Include="MMU.cpp" />
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="Utility.cpp" />

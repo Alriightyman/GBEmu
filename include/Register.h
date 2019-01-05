@@ -46,8 +46,8 @@ namespace Gameboy
 		{
 			struct
 			{
-				u8 Hi;
 				u8 Lo;
+				u8 Hi;
 			};
 
 			u16 Value;

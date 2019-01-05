@@ -12,26 +12,33 @@ namespace Gameboy
 	{
 	}
 
+	void MMU::LoadROM(s8* romData, int length)
+	{
+		for (int i = 0; i < length; ++i)
+		{
+			memory[i] = romData[i];
+		}
+	}
+
 	void MMU::Push(Register & sp, u16 value)
 	{
 		u8 hi = (value >> 8) & 0xFF;
 		u8 lo = value & 0xFF;
 
+		sp--;
 		Write(sp.Value, hi);
-		sp++;
+		sp--;
 		Write(sp.Value, lo);
-		sp++;
+
 	}
 	
 	u16 MMU::Pop(Register & sp)
 	{
-		u8 lo = Read(sp.Value);
-		u8 hi = Read(sp - 1);
+		u16 word = Read(sp.Value + 1) << 8;
+		word |= Read(sp.Value);
 
-		sp -= 2;
-
-		return (hi << 8) | lo;
-
+		sp += 2;
+		return word;
 	}
 
 	u8 MMU::Read(u16 address)
