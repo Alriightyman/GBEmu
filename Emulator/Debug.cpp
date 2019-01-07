@@ -4,9 +4,9 @@
 using namespace std;
 
 
-void Debug::Print(Gameboy::CPU cpu)
+std::string Debug::Print(Gameboy::CPU cpu)
 {
-	std::cout << cpu.PrintRegisters();
+	return cpu.PrintRegisters();
 }
 
 void Debug::ClearScreen()

@@ -68,7 +68,8 @@ namespace Gameboy
 	///		Z - Reset.
 	/// 	N - Reset.
 	/// 	H - Set or reset according to operation.
-	/// 	C - Set or reset according to operation.	/// </summary>
+	/// 	C - Set or reset according to operation.
+	/// </summary>
 	/// <param name="a">The Stack Pointer</param>
 	/// <param name="n">one byte signed immediate value</param>
 	void ALU::AddSP(u16 & sp, s8 n)
@@ -142,7 +143,8 @@ namespace Gameboy
 	///		Z - Set if result is zero.
 	///		N - Reset.
 	///		H - Reset.
-	///		C - Reset.	/// </summary>
+	///		C - Reset.
+	/// </summary>
 	/// <param name="n">A,B,C,D,E,H,L,(HL),#</param>
 	void ALU::XOR(u8 n)
 	{
@@ -156,7 +158,8 @@ namespace Gameboy
 	}
 
 	/// <summary>
-	/// Logical OR n with register A, result in A.	/// Flags affected:
+	/// Logical OR n with register A, result in A.
+	/// Flags affected:
 	///		Z - Set if result is zero.
 	///		N - Reset.
 	///		H - Reset.
@@ -199,7 +202,8 @@ namespace Gameboy
 	///		Z - Set if result is zero.
 	///		N - Reset.
 	///		H - Set if carry from bit 3.
-	///		C - Not affected.	/// </summary>
+	///		C - Not affected.
+	/// </summary>
 	/// <param name="n">A,B,C,D,E,H,L,(HL)</param>
 	void ALU::Inc(u8& reg)
 	{
@@ -217,7 +221,8 @@ namespace Gameboy
 	///		Z - Set if result is zero.
 	///		N - Set.
 	///		H - Set if no borrow from bit 4..
-	///		C - Not affected.	/// </summary>
+	///		C - Not affected.
+	/// </summary>
 	/// <param name="n">A,B,C,D,E,H,L,(HL)</param>
 	void ALU::Dec(u8 & reg)
 	{

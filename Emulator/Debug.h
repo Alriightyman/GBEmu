@@ -5,7 +5,7 @@
 class Debug
 {
 public:
-	static void Print(Gameboy::CPU cpu);
+	static std::string Print(Gameboy::CPU cpu);
 
 	static void ClearScreen();
 };

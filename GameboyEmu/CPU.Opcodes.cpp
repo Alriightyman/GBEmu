@@ -4779,7 +4779,7 @@ private void Daa()
 	{
 		if (!Utility::IsFlagSet(af.Lo, CPUFlags::Z))
 		{
-			pc += (s8)Load8BitImmediateValue();
+			pc += (s8)Load8BitImmediateValue() + 2;
 			cycleCount += 12;
 		}
 		else
@@ -4793,7 +4793,7 @@ private void Daa()
 	{
 		if (Utility::IsFlagSet(af.Lo, CPUFlags::Z))
 		{
-			pc += Load8BitImmediateValue();
+			pc += (s8)Load8BitImmediateValue() + 2;
 			cycleCount += 12;
 		}
 		else
@@ -4807,7 +4807,7 @@ private void Daa()
 	{
 		if (!Utility::IsFlagSet(af.Lo, CPUFlags::C))
 		{
-			pc += Load8BitImmediateValue();
+			pc += (s8)Load8BitImmediateValue() + 2;
 			cycleCount += 12;
 		}
 		else
@@ -4821,7 +4821,7 @@ private void Daa()
 	{
 		if (Utility::IsFlagSet(af.Lo, CPUFlags::C))
 		{
-			pc += Load8BitImmediateValue();
+			pc += (s8)Load8BitImmediateValue() + 2;
 			cycleCount += 12;
 		}
 		else

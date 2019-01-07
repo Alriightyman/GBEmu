@@ -1,6 +1,8 @@
 #include "Emulator.h"
 #include "Debug.h"
 #include <fstream>
+#include "SDL.h"
+
 using namespace Gameboy;
 
 Emulator::Emulator(void) : m_isRunning(false)
@@ -46,6 +48,11 @@ void Emulator::LoadROM(const char * rom)
 	mmu->LoadROM((s8*)cartridgeMemory, length);
 }
 
+std::string Emulator::PrintCPU()
+{
+	Debug::Print(*cpu);
+}
+
 void Emulator::Run()
 {
 	cpu->ResetCycleCount();
@@ -54,7 +61,7 @@ void Emulator::Run()
 	{
 		int cycles = cpu->ExecuteOpcode();
 		//Debug::ClearScreen();
-		Debug::Print(*cpu);
+		//Debug::Print(*cpu);
 		cpu->UpdateTimers();
 		//ppu.UpdateGraphics(cycles);
 		cpu->CheckInterrupts();

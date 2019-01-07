@@ -15,7 +15,7 @@ public:
 	~Emulator(void);
 	bool Initialize();
 	void LoadROM(const char* rom);
-
+	std::string PrintCPU();
 	void Run();
 	void Shutdown();
 };

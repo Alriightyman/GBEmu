@@ -32,8 +32,15 @@ namespace Gameboy
 	{
 		std::stringstream stringStream;
 		char c[8] = { af.Hi, af.Lo, bc.Hi, bc.Lo, de.Hi, de.Lo, hl.Hi, hl.Lo };
-
-		stringStream <<"Opcode: " <<  lastOpcode << " Registers:"
+		stringStream << "Opcode:  " << lastOpcode << " Registers: "
+			<< " AF: " << std::hex << "0x" << static_cast<unsigned short>(af.Value)
+			<< " BC: " << std::hex << "0x" << static_cast<unsigned short>(bc.Value)
+			<< " DE: " << std::hex << "0x" << static_cast<unsigned short>(de.Value)
+			<< " HL: " << std::hex << "0x" << static_cast<unsigned short>(hl.Value)
+			<< " SP: " << std::hex << "0x" << static_cast<unsigned short>(sp.Value)
+			<< " PC: " << std::hex << "0x" << static_cast<unsigned short>(pc.Value)
+			<< " z: " << static_cast<unsigned short>((af.Lo >> 7) & 0x1) << " n: " << static_cast<unsigned short>((af.Lo >> 6) & 0x1) << " h: " << static_cast<unsigned short>((af.Lo >> 5) & 0x1) << " n: " << static_cast<unsigned short>((af.Lo >> 4) & 0x1) << std::endl;
+		/*stringStream <<"Opcode: " <<  lastOpcode << " Registers:"
 			<< " A: " <<   std::hex << "0x"<< std::setprecision(4) << (static_cast<unsigned short>(c[0]) & 0xFF)
 			<< " F: " <<   std::hex << "0x"<< std::setprecision(4) << (static_cast<unsigned short>(c[1]) & 0xFF)
 			<< " B: " <<   std::hex << "0x"<< std::setprecision(4) << (static_cast<unsigned short>(c[2]) & 0xFF)
@@ -44,7 +51,7 @@ namespace Gameboy
 			<< " L: " <<   std::hex << "0x"<< std::setprecision(4) << (static_cast<unsigned short>(c[7]) & 0xFF)
 			<< " SP: " << std::hex << "0x"<<  sp.Value
 			<< " PC: " << std::hex << "0x" << pc.Value << std::endl;
-
+			*/
 		return stringStream.str();
 	}
 
