@@ -5,24 +5,68 @@
 #include "resource.h"
 
 Emulator emu;
+bool isDebuggerOpen = false;
+bool shouldStep = false;
 
 LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (Msg)
 	{
-	case WM_INITDIALOG:
-		return TRUE;
-
-	case WM_COMMAND:
-		switch (wParam)
+		
+		case WM_INITDIALOG:
 		{
-		case IDOK:
-			EndDialog(hWndDlg, 0);
-			return TRUE;
+			//
+
+			HWND hText = GetDlgItem(hWndDlg, IDC_REGISTERTEXT);
+			std::string registers = emu.PrintCPU();
+			SendMessage(hText, WM_SETTEXT, 0, (LPARAM)registers.c_str());
+			isDebuggerOpen = true;
+		}
+		//return TRUE;
+		break;
+
+		case WM_COMMAND:
+			switch (wParam)
+			{
+				case IDOK:
+					EndDialog(hWndDlg, 0);
+					isDebuggerOpen = false;
+					shouldStep = false;
+					return TRUE;
+				case IDC_STEP:
+				{
+					shouldStep = true;
+					HWND hText = GetDlgItem(hWndDlg, IDC_REGISTERTEXT);
+					std::string registers = emu.PrintCPU();
+					SendMessage(hText, WM_SETTEXT, 0, (LPARAM)registers.c_str());
+				}
+			}
+
+			break;
+
+		case WM_KEYDOWN:
+		{
+			switch (wParam)
+			{
+			case VK_F10:
+			{
+				shouldStep = true;
+				HWND hText = GetDlgItem(hWndDlg, IDC_REGISTERTEXT);
+				std::string registers = emu.PrintCPU();
+				SendMessage(hText, WM_SETTEXT, 0, (LPARAM)registers.c_str());
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		break;
+		case WM_KEYUP:
+		{
+			shouldStep = false;
 		}
 		break;
 	}
-
 	return FALSE;
 }
 
@@ -83,7 +127,8 @@ int main(int argc, char** argv)
 	SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
 	SDL_RenderPresent(mainRenderer);
 
-	const std::string rom = R"(C:\Users\Alrii\Documents\Programming\GitHub\GBEmu\Emulator\Roms\Tetris.gb)";
+	//const std::string rom = R"(C:\Users\Alrii\Documents\Programming\GBEmu\Emulator\Roms\Tetris.gb)";
+	const std::string rom = R"(C:\Users\rturner\Documents\Programming\GBEmu\Emulator\Roms\Tetris.gb)";
 	
 	if (!emu.Initialize())
 		return -1;
@@ -93,47 +138,48 @@ int main(int argc, char** argv)
 
 	while (isRunning)
 	{
-		SDL_PollEvent(&mainEvent);
-		switch (mainEvent.type)
+		while (SDL_PollEvent(&mainEvent))
 		{
-		case SDL_WINDOWEVENT_CLOSE:
-			mainEvent.type = SDL_QUIT;
-			SDL_PushEvent(&mainEvent);
-			break;
-		case SDL_SYSWMEVENT:
-			if (mainEvent.syswm.msg->msg.win.msg == WM_COMMAND)
+			switch (mainEvent.type)
 			{
-				// exit app
-				if (LOWORD(mainEvent.syswm.msg->msg.win.wParam) == ID_EXIT)
+			case SDL_WINDOWEVENT_CLOSE:
+				mainEvent.type = SDL_QUIT;
+				SDL_PushEvent(&mainEvent);
+				break;
+			case SDL_SYSWMEVENT:
+				if (mainEvent.syswm.msg->msg.win.msg == WM_COMMAND)
 				{
-					isRunning = false;
-				}
-				// load rom
-				if (LOWORD(mainEvent.syswm.msg->msg.win.wParam) == ID_LOADROM)
-				{
-					emu.LoadROM(rom.c_str());
-					isRomLoaded = true;
-				}
-				// open debugger
-				if (LOWORD(mainEvent.syswm.msg->msg.win.wParam) == ID_DEBUGGER)
-				{
-					auto win = DialogBox(NULL, MAKEINTRESOURCE(IDD_Debugger),
-						windowHandler, reinterpret_cast<DLGPROC>(DlgProc));
-					/*SendDlgItemMessageA(win, IDD_Debugger, UINT   Msg,
-						WPARAM wParam,
-						LPARAM lParam*/
-				}
+					// exit app
+					if (LOWORD(mainEvent.syswm.msg->msg.win.wParam) == ID_EXIT)
+					{
+						isRunning = false;
+					}
+					// load rom
+					if (LOWORD(mainEvent.syswm.msg->msg.win.wParam) == ID_LOADROM)
+					{
+						emu.LoadROM(rom.c_str());
+						isRomLoaded = true;
+					}
+					// open debugger
+					if (LOWORD(mainEvent.syswm.msg->msg.win.wParam) == ID_DEBUGGER)
+					{
+						//auto hDbgWin = CreateWindow("")
+						auto win = CreateDialog(NULL, MAKEINTRESOURCE(IDD_Debugger), windowHandler, reinterpret_cast<DLGPROC>(DlgProc));
+						ShowWindow(win, SW_SHOW);
+						
+					}
 
-			}
-			break;
-		case SDL_QUIT:
-			isRunning = false;
-			break;
-		};
+				}
+				break;
+			case SDL_QUIT:
+				isRunning = false;
+				break;
+			};
+		}
 
-
-		if (isRomLoaded)
+		if (isRomLoaded && (isDebuggerOpen == false || (shouldStep == true && isDebuggerOpen == true)))
 		{
+			shouldStep = false;
 			emu.Run();
 		}
 	}

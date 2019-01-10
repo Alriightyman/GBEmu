@@ -17,7 +17,8 @@ Emulator::Emulator(void) : m_isRunning(false)
 
 Emulator::~Emulator(void)
 {
-
+	cpu.release();
+	mmu.release();	
 }
 
 bool Emulator::Initialize()
@@ -50,7 +51,7 @@ void Emulator::LoadROM(const char * rom)
 
 std::string Emulator::PrintCPU()
 {
-	Debug::Print(*cpu);
+	return Debug::Print(*cpu);
 }
 
 void Emulator::Run()

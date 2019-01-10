@@ -65,7 +65,7 @@ namespace Gameboy
 		MMU* mmu; // pointer to mmu
 		ALU alu;
 
-		std::string lastOpcode;
+		u8 lastOpcode;
 		int cycleCount;
 		bool halt;
 		bool stop;
@@ -85,7 +85,7 @@ namespace Gameboy
 		void UpdateTimers();
 		void CheckInterrupts();
 		std::string PrintRegisters();
-
+		std::string PrintOpcode();
 		void ResetCycleCount();
 		bool IsUpdateFinished();
 
