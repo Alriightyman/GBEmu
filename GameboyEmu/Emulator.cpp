@@ -5,7 +5,7 @@
 
 using namespace Gameboy;
 
-Emulator::Emulator(void) : m_isRunning(false)
+Emulator::Emulator(void) : isRunning(false), romLoaded(false)
 {
 	cartridgeMemory = new char[0x200000];
 
@@ -29,7 +29,7 @@ bool Emulator::Initialize()
 
 void Emulator::LoadROM(std::string romPath)
 {
-	std::fstream in(rom, std::fstream::in | std::fstream::binary);
+	std::fstream in(romPath, std::fstream::in | std::fstream::binary);
 
 	in.seekg(0, in.end);
 	int length = in.tellg();
@@ -47,6 +47,7 @@ void Emulator::LoadROM(std::string romPath)
 	in.close();
 
 	mmu->LoadROM((s8*)cartridgeMemory, length);
+	romLoaded = true;
 }
 
 std::string Emulator::PrintCPU()
@@ -56,21 +57,31 @@ std::string Emulator::PrintCPU()
 
 void Emulator::Run()
 {
-	cpu->ResetCycleCount();
-
-	while (!cpu->IsUpdateFinished())
+	if (romLoaded && !isRunning)
 	{
-		int cycles = cpu->ExecuteOpcode();
-		//Debug::ClearScreen();
-		//Debug::Print(*cpu);
-		cpu->UpdateTimers();
-		//ppu.UpdateGraphics(cycles);
-		cpu->CheckInterrupts();
-	}
+		cpu->ResetCycleCount();
 
-	// RenderScreen();
+		while (!cpu->IsUpdateFinished())
+		{
+			Step();
+		}
+	}
 }
 
 void Emulator::Shutdown()
 {
+	delete[] cartridgeMemory;
+}
+
+void Emulator::Pause(bool shouldPause)
+{
+	isRunning = shouldPause;
+}
+
+void Emulator::Step()
+{
+	int cycles = cpu->ExecuteOpcode();
+	cpu->UpdateTimers();
+	//ppu.UpdateGraphics(cycles);
+	cpu->CheckInterrupts();
 }

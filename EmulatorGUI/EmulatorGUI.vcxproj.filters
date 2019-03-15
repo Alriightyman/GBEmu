@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Gameboy Emulator">
+      <UniqueIdentifier>{e7d84278-93b4-47be-8171-486ca000175a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gameboy Emulator\CPU">
+      <UniqueIdentifier>{0f538220-6c82-4f84-822c-409ee9d5c146}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gameboy Emulator\Memory">
+      <UniqueIdentifier>{15c2694e-9011-4173-9f1e-9e53f036afb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gameboy Emulator\Debug">
+      <UniqueIdentifier>{7001c45e-86a1-465f-99b5-4ab24bca9749}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gameboy Emulator\Helpers">
+      <UniqueIdentifier>{73310eef-8487-48e8-8cd2-2863c6c8e8ab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EmulatorGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLRenderWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameboyEmu\ALU.cpp">
+      <Filter>Gameboy Emulator\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameboyEmu\CPU.cpp">
+      <Filter>Gameboy Emulator\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameboyEmu\CPU.Opcodes.cpp">
+      <Filter>Gameboy Emulator\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameboyEmu\Register.cpp">
+      <Filter>Gameboy Emulator\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameboyEmu\MMU.cpp">
+      <Filter>Gameboy Emulator\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Emulator\Debug.cpp">
+      <Filter>Gameboy Emulator\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameboyEmu\Utility.cpp">
+      <Filter>Gameboy Emulator\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameboyEmu\Emulator.cpp">
+      <Filter>Gameboy Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="CPUDebugger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="EmulatorGUI.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="OpenGLRenderWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CPUDebugger.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="EmulatorGUI.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="CPUDebugger.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="EmulatorGUI.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\ALU.h">
+      <Filter>Gameboy Emulator\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Cpu.h">
+      <Filter>Gameboy Emulator\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Register.h">
+      <Filter>Gameboy Emulator\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Emulator.h">
+      <Filter>Gameboy Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\MMU.h">
+      <Filter>Gameboy Emulator\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Debug.h">
+      <Filter>Gameboy Emulator\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TypesDef.h">
+      <Filter>Gameboy Emulator\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Utility.h">
+      <Filter>Gameboy Emulator\Helpers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

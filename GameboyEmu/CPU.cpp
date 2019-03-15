@@ -25,7 +25,7 @@ namespace Gameboy
 		"LD C,8",
 		"RRCA",
 		"STOP 0",
-		" LD DE,16",
+		"LD DE,16",
 		"LD (DE),A",
 		"INC DE",
 		"INC D",
@@ -546,18 +546,51 @@ namespace Gameboy
 
 	}
 
-	std::string CPU::PrintRegisters()
+	std::string CPU::PrintRegister(std::string regToPrint)
 	{
 		std::stringstream stringStream;
-		char c[8] = { af.Hi, af.Lo, bc.Hi, bc.Lo, de.Hi, de.Lo, hl.Hi, hl.Lo };
-		stringStream 
-			<< "\nAF: " << std::hex << "0x" << static_cast<unsigned short>(af.Value)
-			<< "\nBC: " << std::hex << "0x" << static_cast<unsigned short>(bc.Value)
-			<< "\nDE: " << std::hex << "0x" << static_cast<unsigned short>(de.Value)
-			<< "\nHL: " << std::hex << "0x" << static_cast<unsigned short>(hl.Value)
-			<< "\nSP: " << std::hex << "0x" << static_cast<unsigned short>(sp.Value)
-			<< "\nPC: " << std::hex << "0x" << static_cast<unsigned short>(pc.Value)
-			<< "\nz: " << static_cast<unsigned short>((af.Lo >> 7) & 0x1) << " n: " << static_cast<unsigned short>((af.Lo >> 6) & 0x1) << " h: " << static_cast<unsigned short>((af.Lo >> 5) & 0x1) << " n: " << static_cast<unsigned short>((af.Lo >> 4) & 0x1) << std::endl;
+
+		if (regToPrint == "AF")
+		{
+			stringStream << std::hex << "0x" << static_cast<unsigned short>(af.Value);
+		}
+		else if (regToPrint == "BC")
+		{
+			stringStream << std::hex << "0x" << static_cast<unsigned short>(bc.Value);
+		}
+		else if (regToPrint == "DE")
+		{
+			stringStream << std::hex << "0x" << static_cast<unsigned short>(de.Value);
+		}
+		else if (regToPrint == "HL")
+		{
+			stringStream << std::hex << "0x" << static_cast<unsigned short>(hl.Value);
+		}
+		else if (regToPrint == "PC")
+		{
+			stringStream << std::hex << "0x" << static_cast<unsigned short>(pc.Value);
+		}
+		else if (regToPrint == "SP")
+		{
+			stringStream << std::hex << "0x" << static_cast<unsigned short>(sp.Value);
+		}
+		else if (regToPrint == "FlagZ")
+		{
+			stringStream << static_cast<unsigned short>((af.Lo >> 7) & 0x1);
+		}
+		else if (regToPrint == "FlagN")
+		{
+			stringStream << static_cast<unsigned short>((af.Lo >> 6) & 0x1);
+		}
+		else if (regToPrint == "FlagH")
+		{
+			stringStream << static_cast<unsigned short>((af.Lo >> 5) & 0x1);
+		}
+		else if (regToPrint == "FlagC")
+		{
+			stringStream << static_cast<unsigned short>((af.Lo >> 4) & 0x1);
+		}
+
 		return stringStream.str();
 	}
 
@@ -583,7 +616,7 @@ namespace Gameboy
 				opcode.replace(pos, 2, (char*)Load16BitImmediateValue());
 			}
 		}
-		return "0x" + static_cast<unsigned short>(lastOpcode) + '\t' + opcode;
+		return opcode;
 	}
 
 	void CPU::ResetCycleCount()

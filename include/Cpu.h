@@ -84,7 +84,7 @@ namespace Gameboy
 		int ExecuteOpcode();
 		void UpdateTimers();
 		void CheckInterrupts();
-		std::string PrintRegisters();
+		std::string PrintRegister(std::string registerToPrint);
 		std::string PrintOpcode();
 		void ResetCycleCount();
 		bool IsUpdateFinished();

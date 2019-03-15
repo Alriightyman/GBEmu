@@ -7,7 +7,7 @@ using namespace std;
 std::string Debug::Print(Gameboy::CPU cpu)
 {
 	std::string info = cpu.PrintOpcode();
-	return info + "\n" + cpu.PrintRegisters();
+	return info;// +"\n" + cpu.PrintRegisters();
 }
 
 void Debug::ClearScreen()
